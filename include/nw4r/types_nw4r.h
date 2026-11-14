@@ -12,6 +12,10 @@
 #define NW4R_BYTEORDER_NATIVE NW4R_BYTEORDER_BIG
 #endif
 
+/* Offset of an intrusive list node that directly follows the vtable pointer: 4 on the
+ * console, 8 on a 64-bit host. */
+#define NW4R_LINK_AFTER_VPTR sizeof(void*)
+
 #define NW4R_VERSION(major, minor) ((major & 0xFF) << 8 | minor & 0xFF)
 
 #define FOURCC(c0, c1, c2, c3)                                                 \

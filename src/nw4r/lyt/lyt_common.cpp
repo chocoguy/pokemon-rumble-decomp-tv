@@ -18,7 +18,11 @@ bool EqualsMaterialName(const char* pLhs, const char* pRhs) {
 }
 
 bool TestFileHeader(const res::BinaryFileHeader& rHeader) {
+#if defined(PORT)
+    return rHeader.byteOrder == NW4R_BYTEORDER_NATIVE; /* 0xFEFF was the console's native mark */
+#else
     return rHeader.byteOrder == 0xFEFF;
+#endif
 }
 
 bool TestFileHeader(const res::BinaryFileHeader& rHeader, u32 signature) {

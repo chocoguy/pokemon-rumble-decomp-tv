@@ -1,3 +1,6 @@
+#if defined(PORT)
+#include <port_endian.h>
+#endif
 #include <nw4r/ut/ut_ResFont.h>
 #include <nw4r/ut/ut_binaryFileFormat.h>
 
@@ -26,6 +29,10 @@ ResFont::~ResFont() {}
 bool ResFont::SetResource(void* pBuffer) {
     BinaryFileHeader* pHeader = static_cast<BinaryFileHeader*>(pBuffer);
     FontInformation* pInfo = nullptr;
+
+#if defined(PORT)
+    PortFixupBRFNT(pBuffer);
+#endif
 
     if (!IsManaging(nullptr)) {
         return false;

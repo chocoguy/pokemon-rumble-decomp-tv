@@ -1,3 +1,6 @@
+#if defined(PORT)
+#include <port_endian.h>
+#endif
 #include <nw4r/ut/ut_algorithm.h>
 #include <nw4r/lyt/lyt_layout.h>
 #include <nw4r/lyt/lyt_animation.h>
@@ -22,7 +25,7 @@ void SetTagProcessorImpl(Pane *pPane, ut::TagProcessorBase<wchar_t> *pTagProcess
     if (pTextBox) {
         pTextBox->SetTagProcessor(pTagProcessor);
     }
-    for (ut::LinkList<Pane, 4>::Iterator it = pPane->GetChildList()->GetBeginIter();
+    for (ut::LinkList<Pane, NW4R_LINK_AFTER_VPTR>::Iterator it = pPane->GetChildList()->GetBeginIter();
          it != pPane->GetChildList()->GetEndIter(); ++it) {
         SetTagProcessorImpl(&*it, pTagProcessor);
     }
@@ -62,15 +65,18 @@ Layout::~Layout() {
     if (mpRootPane && !mpRootPane->IsUserAllocated()) {
         DeleteObj(mpRootPane);
     }
-    ut::LinkList<AnimTransform, 4>::Iterator it = mAnimTransList.GetBeginIter();
+    ut::LinkList<AnimTransform, NW4R_LINK_AFTER_VPTR>::Iterator it = mAnimTransList.GetBeginIter();
     while (it != mAnimTransList.GetEndIter()) {
-        ut::LinkList<AnimTransform, 4>::Iterator currIt = it++;
+        ut::LinkList<AnimTransform, NW4R_LINK_AFTER_VPTR>::Iterator currIt = it++;
         mAnimTransList.Erase(currIt);
         DeleteObj(&*currIt);
     }
 }
 
 bool Layout::Build(const void *lytResBuf, ResourceAccessor *pResAcsr) {
+#if defined(PORT)
+    PortFixupBRLYT(const_cast<void *>(lytResBuf));
+#endif
     const res::BinaryFileHeader *pFileHead = (const res::BinaryFileHeader *)(lytResBuf);
     if (!detail::TestFileHeader(*pFileHead, 'RLYT')) {
         return false;

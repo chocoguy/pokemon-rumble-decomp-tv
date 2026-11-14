@@ -12,7 +12,7 @@ namespace nw4r { namespace snd { namespace detail
     {
 
     public:
-        typedef ut::LinkList<Task, 0x04> LinkList;
+        typedef ut::LinkList<Task, NW4R_LINK_AFTER_VPTR> LinkList;
 
     public:
         Task() : mBusyFlag(false) {}

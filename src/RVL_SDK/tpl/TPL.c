@@ -1,6 +1,9 @@
 #include "revolution/tpl.h"
 #include "revolution/gx/GXTexture.h"
 #include "revolution/os.h"
+#if defined(PORT)
+#include <port_endian.h>
+#endif
 
 #if !defined(PORT) /* port version below */
 void TPLBind(TPLPalettePtr pal) {
@@ -44,6 +47,8 @@ static u32 TPLResolve(u32 offset, const void* pal) {
 void TPLBind(TPLPalettePtr pal) {
     u16 i;
     TPLDescriptorPtr descs;
+
+    PortFixupTPL(pal);
 
     if (pal->versionNumber != 2142000) {
         OSPanic(__FILE__, 25, "invalid version number for texture palette");

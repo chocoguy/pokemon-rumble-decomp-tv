@@ -20,7 +20,7 @@ class Pane;
 class ResourceAccessor;
 struct ResBlockSet;
 
-typedef ut::LinkList<AnimTransform, 4> AnimTransformList;
+typedef ut::LinkList<AnimTransform, NW4R_LINK_AFTER_VPTR> AnimTransformList;
 
 namespace res {
 struct Layout {

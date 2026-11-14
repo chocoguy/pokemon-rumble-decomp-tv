@@ -11,8 +11,9 @@ namespace detail {
 u32 PoolImpl::CreateImpl(void* pBuffer, u32 size, u32 stride) {
     ut::AutoInterruptLock lock;
 
-    u8* pPtr = static_cast<u8*>(ut::RoundUp(pBuffer, 4));
-    stride = ut::RoundUp(stride, 4);
+    /* Pointer alignment: 4 on the console, 8 on a 64-bit host. */
+    u8* pPtr = static_cast<u8*>(ut::RoundUp(pBuffer, sizeof(void*)));
+    stride = ut::RoundUp(stride, sizeof(void*));
 
     u32 count = (size - (pPtr - static_cast<u8*>(pBuffer))) / stride;
 

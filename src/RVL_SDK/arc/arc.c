@@ -1,6 +1,9 @@
 #include "revolution/arc.h"
 #include "revolution/os.h"
 #include "MSL_C/ctype.h"
+#if defined(PORT)
+#include <port_endian.h>
+#endif
 
 #define ARC_MAGIC 0x55AA382D
 
@@ -20,6 +23,11 @@ typedef struct FSTEntry {
 BOOL ARCInitHandle(void* arcStart, ARCHandle* handle) {
     FSTEntry* FSTEntries;
     ARCHeader* arcHeader = (ARCHeader*)arcStart;
+
+#if defined(PORT)
+    /* The header and table are big-endian in the file; convert them once, in place. */
+    PortFixupU8(arcStart, (size_t)-1);
+#endif
 
     if (arcHeader->magic != ARC_MAGIC) {
         OSPanic(__FILE__, 74, "ARCInitHandle: bad archive format");

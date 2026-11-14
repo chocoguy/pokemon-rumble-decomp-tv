@@ -3,7 +3,14 @@
 #include "revolution/gx/GXState.h"
 
 
-inline void __GXSetAmbMat(u32 amState) {
+#if defined(PORT)
+/* C99 `inline` alone emits no external definition; the port has no other one. */
+#define GX_GEOMETRY_INLINE static inline
+#else
+#define GX_GEOMETRY_INLINE inline
+#endif
+
+GX_GEOMETRY_INLINE void __GXSetAmbMat(u32 amState) {
     if (amState & GX_DIRTY_AMB_COLOR0) {
         GX_WRITE_XF_REG(XF_REG_AMBIENT0, gx->ambColor[0], 0);
     }
@@ -21,7 +28,7 @@ inline void __GXSetAmbMat(u32 amState) {
     }
 }
 
-inline void __GXSetLightChan(u32 chState) {
+GX_GEOMETRY_INLINE void __GXSetLightChan(u32 chState) {
     u32 bits;
     u32 i;
     u32 chanReg;
@@ -47,7 +54,7 @@ inline void __GXSetLightChan(u32 chState) {
     }
 }
 
-inline void __GXSetTexGen(u32 tgState) {
+GX_GEOMETRY_INLINE void __GXSetTexGen(u32 tgState) {
     u32 bits;
     u32 i;
     u32 texGenReg;

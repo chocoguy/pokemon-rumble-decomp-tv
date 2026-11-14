@@ -548,6 +548,9 @@ inline CFileData::CWorker::BThread::~BThread() {
 
 inline void* CFileData::CWorker::BThread::Entry(void* pThread) {
     static_cast<BThread*>(pThread)->Run();
+#if defined(PORT)
+    return nullptr; /* falling off the end of a value-returning function is undefined */
+#endif
 }
 
 inline CFileData::CWorker::CWorker() : mLoaderThread(this, sConfig.mReadPriority), mDecodeThread(this, sConfig.mDecodePriority) {
@@ -609,7 +612,12 @@ template <> inline string& __list_deleter<string, allocator<string> >::back() { 
 }
 typedef std::detail::map_base<std::string, std::tr1::weak_ptr<CFileData>, std::less<std::string>, std::allocator<std::pair<const std::string, std::tr1::weak_ptr<CFileData> > > > FileCacheMapBase;
 template <> inline std::tr1::weak_ptr<CFileData>& FileCacheMapBase::operator[](const std::string& rKey) { return tree_.find_or_insert(rKey).second; }
+#if defined(PORT)
+/* The original addressed the list as &rOther + sizeof(int), which assumes 4-byte alignment. */
+inline CPath::CPath(const CPath& rOther) : mDevice(rOther.mDevice), mComponents(rOther.mComponents) {}
+#else
 inline CPath::CPath(const CPath& rOther) : mDevice(rOther.mDevice), mComponents(*reinterpret_cast<const std::list<std::string>*>(reinterpret_cast<const char*>(&rOther)+sizeof(rOther.mDevice))) {}
+#endif
 
 inline std::tr1::shared_ptr<CFileData> OpenFileData(const CPath& rPath, u32 flags, long& rError) {
     {

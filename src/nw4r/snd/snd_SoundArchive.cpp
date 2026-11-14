@@ -164,3 +164,32 @@ ut::FileStream* SoundArchive::detail_OpenFileStream(u32 fileId, void* pBuffer,
 
 }
 }
+
+#if defined(PORT)
+/* Dropped by the Wii linker; restored for the port from their callers. */
+namespace nw4r {
+namespace snd {
+
+void SoundArchive::Shutdown() {
+    mFileReader = nullptr;
+    mExtFileRoot[0] = '/';
+    mExtFileRoot[1] = '\0';
+}
+
+void SoundArchive::SetExternalFileRoot(const char* pExtFileRoot) {
+    u32 length = strlen(pExtFileRoot);
+    u32 end = length;
+    if (length > FILE_PATH_MAX - 1) {
+        length = end = FILE_PATH_MAX - 1;
+    }
+    memcpy(mExtFileRoot, pExtFileRoot, length);
+    if (length == 0 || pExtFileRoot[length - 1] != '/') {
+        mExtFileRoot[length] = '/';
+        end++;
+    }
+    mExtFileRoot[end] = '\0';
+}
+
+}
+}
+#endif

@@ -357,10 +357,14 @@ bool InitializeHomeButton(const CHBMParam& rParam, bool allowYield) {
     LoadHomeButtonIcon((spParam->GetResourceRoot() + "/HomeButton3/homeBtnIcon.tpl").c_str());
     WaitFileData(spIcon.operator->(), allowYield);
     TPLBind(static_cast<TPLPalette*>(spIcon->GetData()));
+#if !defined(PORT)
+    /* The port stubs the Home Button Menu (port/stubs): its layout, model and sounds are
+     * never used, so they are not preloaded. The icon above is the game's own. */
     if (spParam->HasFlags(0x10)) {
         InitializeHomeButtonInfo(&sInfo, &sInfoEx, allowYield);
         InitializeSoundData(allowYield);
     }
+#endif
     sInitialized = true;
     return true;
 }
@@ -469,7 +473,9 @@ void UpdateHomeButton() {
                 sController.wiiCon[i].pos.y = 0.0f;
                 sController.wiiCon[i].use_devtype = 0;
             }
+#if !defined(PORT)
             InitializeHomeButtonInfo(&sInfo, &sInfoEx, false);
+#endif
             bool wide = SCGetAspectRatio() == SC_ASPECT_RATIO_16x9;
             if (!wide) {
                 sInfo.adjust.x = 1.0f;
@@ -482,8 +488,10 @@ void UpdateHomeButton() {
             HBMCreateInfoEx(&sInfoEx);
             HBMInit();
             HBMSetAdjustFlag(TRUE);
+#if !defined(PORT)
             InitializeSoundData(false);
             HBMCreateSound(spSound->mArchive.get(), spSound->mWork.get(), 100096);
+#endif
             gFrameTimingReset = true;
             for (int i = 0; i < 4; ++i)
                 WPADControlSpeaker(i, WPAD_SPEAKER_ON, nullptr);

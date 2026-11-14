@@ -1,3 +1,6 @@
+#if defined(PORT)
+#include <port_endian.h>
+#endif
 #include <nw4r/ut/ut_algorithm.h>
 
 #include <nw4r/snd/snd_MemorySoundArchive.h>
@@ -23,6 +26,9 @@ MemorySoundArchive::MemorySoundArchive() : mData(nullptr) {}
 MemorySoundArchive::~MemorySoundArchive() {}
 
 bool MemorySoundArchive::Setup(const void* pSoundArchiveData) {
+#if defined(PORT)
+    PortFixupBRSAR(const_cast<void*>(pSoundArchiveData));
+#endif
     mFileReader.Init(pSoundArchiveData);
     SoundArchive::Setup(&mFileReader);
 

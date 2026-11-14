@@ -133,7 +133,11 @@ typedef struct __GXTexObjInt_struct {
     u32 mode1;
     u32 image0;
     u32 image3;
+#if defined(PORT)
+    u32 userData; /* a 32-bit game address: GXTexObj is 32 bytes, also inside .brres files */
+#else
     void* userData;
+#endif
     GXTexFmt fmt;
     u32 tlutName;
     u16 loadCnt;

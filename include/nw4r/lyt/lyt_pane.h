@@ -75,7 +75,7 @@ public:
 
     static ut::detail::RuntimeTypeInfo typeInfo;
 
-    typedef ut::LinkList<Pane, 4> PaneList;
+    typedef ut::LinkList<Pane, NW4R_LINK_AFTER_VPTR> PaneList;
     void AppendChild(Pane* pChild);
     void PrependChild(Pane* pChild);
     void RemoveChild(Pane* pChild);
@@ -131,7 +131,7 @@ protected:
     void InsertChild(PaneList::Iterator next, Pane* pChild);
     void CalculateMtxChild(const DrawInfo& rInfo);
     Pane* mpParent;
-    ut::LinkList<Pane, 4> mChildList;
+    ut::LinkList<Pane, NW4R_LINK_AFTER_VPTR> mChildList;
     ut::LinkList<AnimationLink, 0> mAnimList;
     Material* mpMaterial;
     math::VEC3 mTranslate;

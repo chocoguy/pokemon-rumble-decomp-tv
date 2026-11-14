@@ -207,7 +207,7 @@ Material *Window::FindMaterialByName(const char *findName, bool bRecursive) {
     }
 
     if (bRecursive) {
-        for (ut::LinkList<Pane, 4>::Iterator it = mChildList.GetBeginIter(); it != mChildList.GetEndIter(); it++) {
+        for (ut::LinkList<Pane, NW4R_LINK_AFTER_VPTR>::Iterator it = mChildList.GetBeginIter(); it != mChildList.GetEndIter(); it++) {
             Material *pMat = it->FindMaterialByName(findName, bRecursive);
             if (pMat) {
                 return pMat;

@@ -1,3 +1,6 @@
+#if defined(PORT)
+#include <port_endian.h>
+#endif
 #include <nw4r/lyt/lyt_common.h>
 #include "nw4r/lyt/lyt_animation.h"
 #include <nw4r/lyt/lyt_material.h>
@@ -347,6 +350,9 @@ AnimResource::AnimResource() {
 
 void AnimResource::Set(const void *animResBuf) {
     Init();
+#if defined(PORT)
+    PortFixupBRLAN(const_cast<void *>(animResBuf));
+#endif
     const res::BinaryFileHeader *pFileHeader = (res::BinaryFileHeader *)animResBuf;
     if (detail::TestFileHeader(*pFileHeader, 'RLAN')) {
         if (detail::TestFileVersion(*pFileHeader)) {

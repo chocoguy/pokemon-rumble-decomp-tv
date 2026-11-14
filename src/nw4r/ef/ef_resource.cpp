@@ -1,3 +1,6 @@
+#if defined(PORT)
+#include <port_endian.h>
+#endif
 #include <nw4r/ef/ef_effect.h>
 #include <string.h>
 #include <nw4r/ef/ef_effectsystem.h>
@@ -8,6 +11,15 @@
 #include <nw4r/ef/ef_resource.h>
 #include <nw4r/ef/ef_util.h>
 #include <nw4r/math/math_arithmetic.h>
+
+namespace {
+/* Name lengths sit at odd offsets in the file; read them without an unaligned load. */
+inline u16 ReadNameLength(const u8* p) {
+    u16 v;
+    memcpy(&v, p, sizeof(v));
+    return v;
+}
+}
 
 namespace nw4r {
 namespace ef {
@@ -22,8 +34,13 @@ Resource::Resource() {
 }
 
 void Resource::Initialize() {
+#if defined(PORT)
+    ut::List_Init(&mBREFFList, offsetof(EffectProject, projectlink) | NW4R_UT_LIST_LINK32);
+    ut::List_Init(&mBREFTList, offsetof(TextureProject, projectlink) | NW4R_UT_LIST_LINK32);
+#else
     ut::List_Init(&mBREFFList, offsetof(EffectProject, projectlink));
     ut::List_Init(&mBREFTList, offsetof(TextureProject, projectlink));
+#endif
     mNumEmitter = 0;
     mNumTexture = 0;
 }
@@ -75,7 +92,12 @@ struct NameTable {
         EmitterResource* pResource = reinterpret_cast<EmitterResource*>(
             reinterpret_cast<u8*>(pNameTable) + offset);
 
+#if defined(PORT)
+        /* The name slot is 4 bytes in the file (EmitterResource::name is a Ptr32). */
+        *reinterpret_cast<u32*>(pResource) = PortAddr(pName);
+#else
         *reinterpret_cast<char**>(pResource) = pName;
+#endif
 
         pResource->LocateTracks();
     }
@@ -232,6 +254,9 @@ static TextureData* breftSearchName(TextureProject* pTexProject,
 }
 
 EffectProject* Resource::Add(u8* pData) {
+#if defined(PORT)
+    PortFixupBREFF(pData);
+#endif
     u8* pPtr = pData;
 
     FileHeader* pFileHeader = reinterpret_cast<FileHeader*>(pPtr);
@@ -242,7 +267,7 @@ EffectProject* Resource::Add(u8* pData) {
 
     EffectProject* pEffProject = reinterpret_cast<EffectProject*>(pPtr);
 
-    memset(&pEffProject->projectlink, 0, sizeof(ut::Link));
+    memset(&pEffProject->projectlink, 0, sizeof(pEffProject->projectlink));
     ut::List_Append(&mBREFFList, pEffProject);
 
     mNumEmitter += breffNumEmitter(pEffProject);
@@ -358,6 +383,9 @@ Resource::_GetEmitterIndexOf(u32 idx, EffectProject* pEffProject) const {
 }
 
 TextureProject* Resource::AddTexture(u8* pData) {
+#if defined(PORT)
+    PortFixupBREFT(pData);
+#endif
     u8* pPtr = pData;
 
     FileHeader* pFileHeader = reinterpret_cast<FileHeader*>(pPtr);
@@ -368,7 +396,7 @@ TextureProject* Resource::AddTexture(u8* pData) {
 
     TextureProject* pTexProject = reinterpret_cast<TextureProject*>(pPtr);
 
-    memset(&pTexProject->projectlink, 0, sizeof(ut::Link));
+    memset(&pTexProject->projectlink, 0, sizeof(pTexProject->projectlink));
     ut::List_Append(&mBREFTList, pTexProject);
 
     mNumTexture += breftNumTexture(pTexProject);
@@ -407,7 +435,7 @@ u32 Resource::relocateCurveTexture(u8* pCmdList,
                 pNameTable->count * sizeof(AnimCurveNameTable::Name);
 
     for (int i = 0; i < pNameTable->count; i++) {
-        int size = *reinterpret_cast<u16*>(pName);
+        int size = ReadNameLength(pName);
         pName += sizeof(u16);
 
         pNameTable->datas[i].work = PortAddr(
@@ -453,7 +481,7 @@ u32 Resource::relocateCurveChild(u8* pCmdList,
                 pNameTable->count * sizeof(AnimCurveNameTable::Name);
 
     for (int i = 0; i < pNameTable->count; i++) {
-        int size = *reinterpret_cast<u16*>(pName);
+        int size = ReadNameLength(pName);
         pName += sizeof(u16);
 
         pNameTable->datas[i].work = PortAddr(
@@ -490,7 +518,7 @@ u32 Resource::RelocateCommand() {
         u8* pPtr = pPtclDesc->textureNames;
 
         for (int i = 0; i < TEX_LAYER_MAX; i++) {
-            u16 size = *reinterpret_cast<u16*>(pPtr);
+            u16 size = ReadNameLength(pPtr);
             pPtr += sizeof(u16);
 
             ppWork[i] = _FindTexture(reinterpret_cast<char*>(pPtr), NULL);

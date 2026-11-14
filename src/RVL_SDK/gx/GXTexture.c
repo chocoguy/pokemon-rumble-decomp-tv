@@ -334,12 +334,20 @@ void GXInitTexObjFilter(GXTexObj* obj, GXTexFilter min_filt, GXTexFilter mag_fil
 
 void GXInitTexObjUserData(GXTexObj* obj, void* user_data) {
     GX_SETUP_TEXOBJ(t, obj)
+#if defined(PORT)
+    t->userData = PortAddr(user_data);
+#else
     t->userData = user_data;
+#endif
 }
 
 void* GXGetTexObjUserData(const GXTexObj* obj) {
     GX_SETUP_TEXOBJ(t, obj)
+#if defined(PORT)
+    return PortPtrRaw(t->userData);
+#else
     return t->userData;
+#endif
 }
 #pragma pop
 

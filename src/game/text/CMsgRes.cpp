@@ -1,3 +1,6 @@
+#if defined(PORT)
+#include <port_endian.h>
+#endif
 #include <game/text/CMsgRes.h>
 
 #include <MSL_C/locale.h>
@@ -274,6 +277,11 @@ void CMsgRes::Setup() {
     }
 
     u8* pBlock = static_cast<u8*>(mpResource);
+#if defined(PORT)
+    if (pBlock != nullptr) {
+        PortFixupBMG(pBlock);
+    }
+#endif
     if (pBlock != nullptr) {
         mpHeader = reinterpret_cast<FileHeader*>(pBlock);
         s32 size = mpHeader->mFileSize;

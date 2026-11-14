@@ -17,6 +17,17 @@ struct Link {
     void* nextObject;
 };
 
+#if defined(PORT)
+/* A link inside file data, where the console's 8-byte Link must stay 8 bytes: two 32-bit
+ * game addresses. A list whose objects use it is initialised with
+ * List_Init(&list, offsetof(T, link) | NW4R_UT_LIST_LINK32). */
+struct Link32 {
+    u32 prevObject;
+    u32 nextObject;
+};
+#define NW4R_UT_LIST_LINK32 0x8000
+#endif
+
 void List_Init(List* pList, u16 offset);
 
 void List_Append(List* pList, void* pObject);

@@ -258,3 +258,34 @@ void NandSoundArchive::NandFileStream::Seek(s32 offset, u32 origin) {
 }
 
 }}
+
+#if defined(PORT)
+/* The Wii linker dropped these (the game never opens a sound archive from NAND), so the
+ * decomp has no matching source. Written from their use above: a read-only view of
+ * [offset, offset + size) of a NAND file. */
+namespace nw4r {
+namespace snd {
+
+NandSoundArchive::NandFileStream::NandFileStream(const NANDFileInfo* pFileInfo, u32 offset, u32 size)
+    : mOffset(offset), mSize(size) {
+    if (Open(pFileInfo->origPath, NAND_ACCESS_READ)) {
+        if (mSize == 0) {
+            mSize = ut::NandFileStream::GetSize();
+        }
+        ut::NandFileStream::Seek(mOffset, SEEK_ORIGIN_BEG);
+    }
+}
+
+NandSoundArchive::NandFileStream::NandFileStream(const char* pPath, u32 offset, u32 size)
+    : mOffset(offset), mSize(size) {
+    if (Open(pPath, NAND_ACCESS_READ)) {
+        if (mSize == 0) {
+            mSize = ut::NandFileStream::GetSize();
+        }
+        ut::NandFileStream::Seek(mOffset, SEEK_ORIGIN_BEG);
+    }
+}
+
+}
+}
+#endif

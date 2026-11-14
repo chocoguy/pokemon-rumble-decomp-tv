@@ -255,12 +255,19 @@ private:
 };
 struct unused_argument;
 
+#if defined(PORT)
+/* Passing a non-POD functor through `...` is undefined, and clang compiles it to a trap. */
+template <typename F> bool is_null(const F&) {
+    return false;
+}
+#else
 #if defined(CPII_EMISSION_LAYOUT)
 static
 #endif
 inline bool is_null(...) {
     return false;
 }
+#endif
 
 template <typename F> bool is_null(F* p) {
     return p == nullptr;
@@ -422,7 +429,11 @@ public:
 #endif
 
 private:
+#if defined(PORT)
+    template <typename F> static bool is_empty(const F&) { return false; }
+#else
     static bool is_empty(...) { return false; }
+#endif
     template <typename F> static bool is_empty(F* pFunction) { return pFunction == nullptr; }
     template <typename F, typename C> static bool is_empty(F C::*pMember) { return pMember == nullptr; }
     template <typename S> static bool is_empty(const function<S>& rFunction) { return !rFunction; }

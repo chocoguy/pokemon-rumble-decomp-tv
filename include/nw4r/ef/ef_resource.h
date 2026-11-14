@@ -11,7 +11,11 @@ namespace ef {
 
 struct EffectProject {
     u32 headersize;
+#if defined(PORT)
+    ut::Link32 projectlink; /* 8 bytes in the file */
+#else
     ut::Link projectlink;
+#endif
     u16 projectnameLen;
     u16 PADDING_0xE;
     u8 projectname[4];
@@ -19,7 +23,11 @@ struct EffectProject {
 
 struct TextureProject {
     u32 headersize;
+#if defined(PORT)
+    ut::Link32 projectlink; /* 8 bytes in the file */
+#else
     ut::Link projectlink;
+#endif
     u16 projectnameLen;
     u16 PADDING_0xE;
     u8 projectname[4];

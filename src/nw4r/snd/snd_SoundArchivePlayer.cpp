@@ -33,6 +33,13 @@
 #include "nw4r/ut/ut_FileStream.h"
 #include "nw4r/ut/ut_algorithm.h"
 
+#include <stddef.h>
+
+/* Blocks carved from the player's memory hold pointers: align them to the pointer size
+ * (4 on the console, 8 on a 64-bit host), and size the address tables from their real
+ * layout rather than from 4-byte pointers. */
+#define SND_PTR_ALIGN sizeof(void*)
+
 namespace nw4r { namespace snd {
 
 SoundArchivePlayer::SoundArchivePlayer() :
@@ -133,13 +140,13 @@ u32 SoundArchivePlayer::GetRequiredMemSize(SoundArchive const *arc)
 			if (playerInfo.heapSize == 0)
 				continue;
 
-			size += ut::RoundUp(sizeof(detail::PlayerHeap), 4);
+			size += ut::RoundUp(sizeof(detail::PlayerHeap), SND_PTR_ALIGN);
 			size = ut::RoundUp(size, 32);
 			size += ut::RoundUp(playerInfo.heapSize, 4);
 		}
 	}
 
-	size += ut::RoundUp(sizeof(u32) + arc->GetGroupCount() * 8, 4);
+	size += ut::RoundUp(offsetof(GroupAddressTable, items) + arc->GetGroupCount() * sizeof(GroupAddress), SND_PTR_ALIGN);
 
 	SoundArchive::SoundArchivePlayerInfo soundArchivePlayerInfo;
 	if (arc->ReadSoundArchivePlayerInfo(&soundArchivePlayerInfo))
@@ -158,7 +165,7 @@ u32 SoundArchivePlayer::GetRequiredMemSize(SoundArchive const *arc)
 		                    4);
 	}
 
-	size += ut::RoundUp(sizeof(u32) + arc->detail_GetFileCount() * 8, 4);
+	size += ut::RoundUp(offsetof(FileAddressTable, items) + arc->detail_GetFileCount() * sizeof(FileAddress), SND_PTR_ALIGN);
 
 	return size;
 }
@@ -229,7 +236,7 @@ detail::PlayerHeap *SoundArchivePlayer::CreatePlayerHeap(void **buffer,
                                                          void *endp,
                                                          u32 heapSize)
 {
-	void *ep = ut::RoundUp(ut::AddOffsetToPtr(*buffer, 32), 4);
+	void *ep = ut::RoundUp(ut::AddOffsetToPtr(*buffer, 32), SND_PTR_ALIGN);
 	if (ut::ComparePtr(ep, endp) > 0)
 		return nullptr;
 
@@ -239,7 +246,7 @@ detail::PlayerHeap *SoundArchivePlayer::CreatePlayerHeap(void **buffer,
 	detail::PlayerHeap *playerHeap = new (buf) detail::PlayerHeap;
 	*buffer = ut::RoundUp(*buffer, 32);
 
-	ep = ut::RoundUp(ut::AddOffsetToPtr(*buffer, heapSize), 4);
+	ep = ut::RoundUp(ut::AddOffsetToPtr(*buffer, heapSize), SND_PTR_ALIGN);
 	if (ut::ComparePtr(ep, endp) > 0)
 		return nullptr;
 
@@ -259,7 +266,7 @@ bool SoundArchivePlayer::SetupSoundPlayer(SoundArchive const *arc,
 	u32 playerCount = arc->GetPlayerCount();
 	u32 requireSize = sizeof(SoundPlayer) * playerCount;
 
-	void *ep = ut::RoundUp(ut::AddOffsetToPtr(*buffer, requireSize), 4);
+	void *ep = ut::RoundUp(ut::AddOffsetToPtr(*buffer, requireSize), SND_PTR_ALIGN);
 
 	if (ut::ComparePtr(ep, endp) > 0)
 		return false;
@@ -306,9 +313,9 @@ bool SoundArchivePlayer::SetupSoundPlayer(SoundArchive const *arc,
 bool SoundArchivePlayer::CreateGroupAddressTable(SoundArchive const *arc,
                                                  void **buffer, void *endp)
 {
-	u32 requireSize = sizeof(u32) + sizeof(GroupAddress) * arc->GetGroupCount();
+	u32 requireSize = offsetof(GroupAddressTable, items) + sizeof(GroupAddress) * arc->GetGroupCount();
 
-	void *ep = ut::RoundUp(ut::AddOffsetToPtr(*buffer, requireSize), 4);
+	void *ep = ut::RoundUp(ut::AddOffsetToPtr(*buffer, requireSize), SND_PTR_ALIGN);
 
 	if (ut::ComparePtr(ep, endp) > 0)
 		return false;
@@ -331,9 +338,9 @@ bool SoundArchivePlayer::CreateFileAddressTable(SoundArchive const *arc,
                                                 void **buffer, void *endp)
 {
 	u32 requireSize =
-		sizeof(u32) + sizeof(FileAddress) * arc->detail_GetFileCount();
+		offsetof(FileAddressTable, items) + sizeof(FileAddress) * arc->detail_GetFileCount();
 
-	void *ep = ut::RoundUp(ut::AddOffsetToPtr(*buffer, requireSize), 4);
+	void *ep = ut::RoundUp(ut::AddOffsetToPtr(*buffer, requireSize), SND_PTR_ALIGN);
 
 	if (ut::ComparePtr(ep, endp) > 0)
 		return false;
@@ -357,7 +364,7 @@ bool SoundArchivePlayer::SetupSeqSound(SoundArchive const *arc,
 {
 	u32 requireSize = sizeof(detail::SeqSound) * numSounds;
 
-	void *ep = ut::RoundUp(ut::AddOffsetToPtr(*buffer, requireSize), 4);
+	void *ep = ut::RoundUp(ut::AddOffsetToPtr(*buffer, requireSize), SND_PTR_ALIGN);
 
 	if (ut::ComparePtr(ep, endp) > 0)
 		return false;
@@ -376,7 +383,7 @@ bool SoundArchivePlayer::SetupWaveSound(SoundArchive const *arc,
 {
 	u32 requireSize = sizeof(detail::WaveSound) * numSounds;
 
-	void *ep = ut::RoundUp(ut::AddOffsetToPtr(*buffer, requireSize), 4);
+	void *ep = ut::RoundUp(ut::AddOffsetToPtr(*buffer, requireSize), SND_PTR_ALIGN);
 
 	if (ut::ComparePtr(ep, endp) > 0)
 		return false;
@@ -395,7 +402,7 @@ bool SoundArchivePlayer::SetupStrmSound(SoundArchive const *arc,
 {
 	u32 requireSize = sizeof(detail::StrmSound) * numSounds;
 
-	void *ep = ut::RoundUp(ut::AddOffsetToPtr(*buffer, requireSize), 4);
+	void *ep = ut::RoundUp(ut::AddOffsetToPtr(*buffer, requireSize), SND_PTR_ALIGN);
 
 	if (ut::ComparePtr(ep, endp) > 0)
 		return false;
@@ -414,7 +421,7 @@ bool SoundArchivePlayer::SetupSeqTrack(SoundArchive const *arc,
 
 	u32 requireSize = sizeof(detail::MmlSeqTrack) * numTracks;
 
-	void *ep = ut::RoundUp(ut::AddOffsetToPtr(*buffer, requireSize), 4);
+	void *ep = ut::RoundUp(ut::AddOffsetToPtr(*buffer, requireSize), SND_PTR_ALIGN);
 
 	if (ut::ComparePtr(ep, endp) > 0)
 		return false;

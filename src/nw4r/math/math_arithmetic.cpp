@@ -38,3 +38,24 @@ u32 CntBit1(u32 x) {
 
 }
 }
+
+#if defined(PORT)
+/* The table-driven versions were dropped by the Wii linker (nothing in the game called
+ * them directly); the C library computes the same functions. */
+#include <math.h>
+namespace nw4r {
+namespace math {
+namespace detail {
+
+f32 FExp(f32 x) {
+    return expf(x);
+}
+
+f32 FLog(f32 x) {
+    return logf(x);
+}
+
+}
+}
+}
+#endif

@@ -45,9 +45,9 @@ public:
     ~GroupContainer();
     void AppendGroup(Group* pGroup);
     Group* FindGroupByName(const char* pName);
-    ut::LinkList<Group, 4>& GetGroupList() { return mGroupList; }
+    ut::LinkList<Group, NW4R_LINK_AFTER_VPTR>& GetGroupList() { return mGroupList; }
 protected:
-    ut::LinkList<Group, 4> mGroupList;
+    ut::LinkList<Group, NW4R_LINK_AFTER_VPTR> mGroupList;
 };
 }
 }

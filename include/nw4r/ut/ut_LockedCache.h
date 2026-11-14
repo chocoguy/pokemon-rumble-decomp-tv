@@ -24,7 +24,7 @@ void StoreData(void* pDst, void* pSrc, u32 size);
 }
 }
 }
-extern "C" void* PORTLockedCacheBase(void); /* port/os: the calling thread's 16 KB scratch area */
+extern "C" void* PORTLockedCacheBase(void); /* port/os: the 16 KB locked cache, shared like the console's (one CPU) */
 namespace nw4r {
 namespace ut {
 namespace LC {

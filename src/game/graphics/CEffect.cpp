@@ -159,7 +159,13 @@ int sNumUsedEffectGroupID;
 }
 
 inline u32 GetEffectHeapSize(u32 numEffect, u32 numEmitter, u32 numParticleManager, u32 numParticle, u32 maxGroupID) {
+#if defined(PORT)
+    /* 0x220 covered the block headers and pool objects with 4-byte pointers; with 8-byte
+     * pointers they are about twice as large. */
+    return 0x800 + AlignHeap(sizeof(nw4r::ef::Effect) * numEffect + 0x20) +
+#else
     return 0x220 + AlignHeap(sizeof(nw4r::ef::Effect) * numEffect + 0x20) +
+#endif
            AlignHeap(sizeof(EmitterWithParam) * numEmitter + 0x20) +
            AlignHeap(sizeof(nw4r::ef::ParticleManager) * numParticleManager + 0x20) +
            AlignHeap(sizeof(nw4r::ef::Particle) * numParticle + 0x20) +

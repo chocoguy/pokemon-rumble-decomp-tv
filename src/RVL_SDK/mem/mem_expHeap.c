@@ -301,10 +301,18 @@ static BOOL RecycleRegion_(MEMiExpHeapHead* pEHHead, const MemRegion* pRegion) {
     return TRUE;
 }
 
-MEMHeapHandle MEMCreateExpHeapEx(void* startAddress, u32 size, u16 optFlag) {
-    void* endAddress = RoundDownPtr(AddU32ToPtr(startAddress, size), 4);
+#if defined(PORT)
+/* Block headers hold two pointers, so on a 64-bit host they need 8-byte alignment: every
+ * block start and size is a multiple of 8 (4 on the console). */
+#define EXP_HEAP_MIN_ALIGN 8
+#else
+#define EXP_HEAP_MIN_ALIGN 4
+#endif
 
-    startAddress = RoundUpPtr(startAddress, 4);
+MEMHeapHandle MEMCreateExpHeapEx(void* startAddress, u32 size, u16 optFlag) {
+    void* endAddress = RoundDownPtr(AddU32ToPtr(startAddress, size), EXP_HEAP_MIN_ALIGN);
+
+    startAddress = RoundUpPtr(startAddress, EXP_HEAP_MIN_ALIGN);
 
     if (GetUIntPtr(startAddress) > GetUIntPtr(endAddress) ||
         GetOffsetFromPtr(startAddress, endAddress) < sizeof(MEMiHeapHead) + sizeof(MEMiExpHeapHead) + sizeof(MEMiExpHeapMBlockHead) + MIN_FREE_BLOCK_SIZE) {
@@ -326,7 +334,15 @@ void* MEMAllocFromExpHeapEx(MEMHeapHandle heap, u32 size, int alignment) {
         size = 1;
     }
 
-    size = RoundUp(size, 4);
+    size = RoundUp(size, EXP_HEAP_MIN_ALIGN);
+
+#if defined(PORT)
+    if (alignment >= 0 && alignment < EXP_HEAP_MIN_ALIGN) {
+        alignment = EXP_HEAP_MIN_ALIGN;
+    } else if (alignment < 0 && -alignment < EXP_HEAP_MIN_ALIGN) {
+        alignment = -EXP_HEAP_MIN_ALIGN;
+    }
+#endif
 
     LockHeap(heap);
 
