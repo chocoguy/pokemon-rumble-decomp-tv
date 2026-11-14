@@ -1,7 +1,7 @@
 #define GAME_SCRIPTWORLDOBJ_SEPARATE_TEMPLATES
 #define GAME_SCRIPTWORLDOBJ_CONTAINER_TAIL
 #include <game/script/detail/ScriptWorldObjContainers.h>
-namespace std { namespace detail { template<> WorldIdTree::iterator::__generic_iterator(const WorldIdTree::iterator& rOther) : node_(rOther.node_) {} } } 
+namespace std { namespace detail { template<> template<> WorldIdTree::iterator::__generic_iterator(const WorldIdTree::iterator& rOther) : node_(rOther.node_) {} } } 
 namespace std { namespace detail { template<> unsigned long WorldIdTree::size() const {return sz();} } } 
 namespace std { namespace detail { template<> unsigned long WorldIdTree::max_size() const {return numeric_limits<unsigned long>::max();} } } 
 namespace std { namespace detail { template<> WorldNodeAllocator& WorldIdTree::node_alloc() {return root_.first();} } } 

@@ -1,3 +1,5 @@
+/* MSL's wide character classes, on the port too: they classify only characters below
+ * 256 (so U+3000 is not a space), and the game's text layout was tuned on that. */
 #ifndef MSL_WCTYPE_H
 #define MSL_WCTYPE_H
 

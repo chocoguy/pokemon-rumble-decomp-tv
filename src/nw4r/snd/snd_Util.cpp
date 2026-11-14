@@ -720,7 +720,8 @@ void const *Util::GetDataRefAddressImpl(RefType refType, u32 value,
 	}
 	else if (refType == REFTYPE_ADDRESS)
 	{
-		return reinterpret_cast<void const *>(Util::ReadBigEndian(value));
+		// An absolute address in the file. Nothing in this game writes one at run time.
+		return PortPtr<void const *>(Util::ReadBigEndian(value));
 	}
 	else
 	{

@@ -1,3 +1,8 @@
+#if defined(PORT)
+/* The port uses the system C library; see port/include/port_libc.h for the additions. */
+#include_next <signal.h>
+#include <port_libc.h>
+#else
 #ifndef MSL_SIGNAL_H
 #define MSL_SIGNAL_H
 
@@ -18,4 +23,5 @@ int raise(int sig);
 }
 #endif
 
+#endif
 #endif

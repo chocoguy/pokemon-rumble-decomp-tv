@@ -284,114 +284,38 @@ VEC3* VEC3Maximize(VEC3* pOut, const VEC3* pA, const VEC3* pB);
 VEC3* VEC3Minimize(VEC3* pOut, const VEC3* pA, const VEC3* pB);
 VEC3* VEC3TransformNormal(VEC3* pOut, const MTX34* pMtx, const VEC3* pVec);
 
-inline VEC3* VEC3Add(register VEC3* pOut, register const VEC3* pA,
-                     register const VEC3* pB) {
-    register f32 work0, work1, work2;
-
-    asm (
-        psq_l  work0, VEC3.x(pA),   0, 0
-        psq_l  work1, VEC3.x(pB),   0, 0
-        ps_add work2, work0, work1
-        psq_st work2, VEC3.x(pOut), 0, 0
-
-        psq_l  work0, VEC3.z(pA),   1, 0
-        psq_l  work1, VEC3.z(pB),   1, 0
-        ps_add work2, work0, work1
-        psq_st work2, VEC3.z(pOut), 1, 0
-    )
-
+inline VEC3* VEC3Add(VEC3* pOut, const VEC3* pA, const VEC3* pB) {
+    f32 x = pA->x + pB->x, y = pA->y + pB->y, z = pA->z + pB->z;
+    pOut->x = x; pOut->y = y; pOut->z = z;
     return pOut;
 }
 
-inline f32 VEC3Dot(register const VEC3* pA, register const VEC3* pB) {
-    register f32 dot;
-    register f32 work0, work1, work2, work3;
-
-    asm (
-        psq_l  work0, VEC3.y(pA), 0, 0
-        psq_l  work1, VEC3.y(pB), 0, 0
-        ps_mul work0, work0, work1
-
-        psq_l   work3, VEC3.x(pA), 1, 0
-        psq_l   work2, VEC3.x(pB), 1, 0
-        ps_madd work1, work3, work2, work0
-
-        ps_sum0 dot, work1, work0, work0
-    )
-
-    return dot;
+inline f32 VEC3Dot(const VEC3* pA, const VEC3* pB) {
+    // Same operation order and fused multiply-add as the paired-single original.
+    return __builtin_fmaf(pA->x, pB->x, pA->y * pB->y) + pA->z * pB->z;
 }
 
-inline f32 VEC3LenSq(register const VEC3* pVec) {
-    register f32 work0, work1, work2;
-
-    asm (
-        psq_l  work0, VEC3.x(pVec), 0, 0
-        ps_mul work0, work0, work0
-
-        lfs     work1, VEC3.z(pVec)
-        ps_madd work2, work1, work1, work0
-
-        ps_sum0 work2, work2, work0, work0
-    )
-
-    return work2;
+inline f32 VEC3LenSq(const VEC3* pVec) {
+    return __builtin_fmaf(pVec->z, pVec->z, pVec->x * pVec->x) + pVec->y * pVec->y;
 }
 
-inline VEC3* VEC3Lerp(register VEC3* pOut, register const VEC3* pVec1,
-                      register const VEC3* pVec2, register f32 t) {
-    register f32 work0, work1, work2;
-
-    asm (
-        psq_l  work0, VEC3.x(pVec1), 0, 0
-        psq_l  work1, VEC3.x(pVec2), 0, 0
-        ps_sub work2, work1, work0
-        ps_madds0 work2, work2, t, work0
-        psq_st    work2, VEC3.x(pOut), 0, 0
-
-        psq_l  work0, VEC3.z(pVec1), 1, 0
-        psq_l  work1, VEC3.z(pVec2), 1, 0
-        ps_sub work2, work1, work0
-        ps_madds0 work2, work2, t, work0
-        psq_st    work2, VEC3.z(pOut), 1, 0
-    )
-
+inline VEC3* VEC3Lerp(VEC3* pOut, const VEC3* pVec1, const VEC3* pVec2, f32 t) {
+    f32 x = __builtin_fmaf(pVec2->x - pVec1->x, t, pVec1->x);
+    f32 y = __builtin_fmaf(pVec2->y - pVec1->y, t, pVec1->y);
+    f32 z = __builtin_fmaf(pVec2->z - pVec1->z, t, pVec1->z);
+    pOut->x = x; pOut->y = y; pOut->z = z;
     return pOut;
 }
 
-inline VEC3* VEC3Scale(register VEC3* pOut, register const VEC3* pIn,
-                       register f32 scale) {
-    register f32 work0, work1;
-
-    asm (
-        psq_l    work0, VEC3.x(pIn),  0, 0
-        ps_muls0 work1, work0, scale
-        psq_st   work1, VEC3.x(pOut), 0, 0
-
-        psq_l    work0, VEC3.z(pIn),  1, 0
-        ps_muls0 work1, work0, scale
-        psq_st   work1, VEC3.z(pOut), 1, 0
-    )
-
+inline VEC3* VEC3Scale(VEC3* pOut, const VEC3* pIn, f32 scale) {
+    f32 x = pIn->x * scale, y = pIn->y * scale, z = pIn->z * scale;
+    pOut->x = x; pOut->y = y; pOut->z = z;
     return pOut;
 }
 
-inline VEC3* VEC3Sub(register VEC3* pOut, register const VEC3* pA,
-                     register const VEC3* pB) {
-    register f32 work0, work1, work2;
-
-    asm (
-        psq_l  work0, VEC3.x(pA),   0, 0
-        psq_l  work1, VEC3.x(pB),   0, 0
-        ps_sub work2, work0, work1
-        psq_st work2, VEC3.x(pOut), 0, 0
-
-        psq_l  work0, VEC3.z(pA),   1, 0
-        psq_l  work1, VEC3.z(pB),   1, 0
-        ps_sub work2, work0, work1
-        psq_st work2, VEC3.z(pOut), 1, 0
-    )
-
+inline VEC3* VEC3Sub(VEC3* pOut, const VEC3* pA, const VEC3* pB) {
+    f32 x = pA->x - pB->x, y = pA->y - pB->y, z = pA->z - pB->z;
+    pOut->x = x; pOut->y = y; pOut->z = z;
     return pOut;
 }
 

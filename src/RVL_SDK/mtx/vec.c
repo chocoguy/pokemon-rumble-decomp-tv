@@ -1,5 +1,6 @@
 #include "revolution/mtx.h"
 
+#if !defined(PORT) /* port version below */
 asm void PSVECAdd
 (
     const register Vec *vec1,
@@ -20,7 +21,14 @@ asm void PSVECAdd
 
     blr
 }
+#else
+void PSVECAdd(const Vec* vec1, const Vec* vec2, Vec* dst) {
+    f32 x = vec1->x + vec2->x, y = vec1->y + vec2->y, z = vec1->z + vec2->z;
+    dst->x = x; dst->y = y; dst->z = z;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 void PSVECNormalize
 (
     const register Vec *vec1,
@@ -53,7 +61,18 @@ void PSVECNormalize
         psq_st      v1_z, 8(dst), 1, 0
     }
 }
+#else
+void PSVECNormalize(const Vec* vec1, Vec* dst) {
+    /* The original multiplies by a refined reciprocal square root and, like this,
+       produces infinities or NaNs for a zero vector. */
+    f32 s = 1.0f / __builtin_sqrtf(vec1->x * vec1->x + vec1->y * vec1->y + vec1->z * vec1->z);
+    dst->x = vec1->x * s;
+    dst->y = vec1->y * s;
+    dst->z = vec1->z * s;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 f32 PSVECMag(const register Vec *v)
 {
     register f32 vxy, vzz, sqmag;
@@ -89,7 +108,14 @@ f32 PSVECMag(const register Vec *v)
 
     return sqmag;
 }
+#else
+f32 PSVECMag(const Vec* v) {
+    f32 sq = v->x * v->x + v->y * v->y + v->z * v->z;
+    return sq > 0.0f ? __builtin_sqrtf(sq) : 0.0f;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 asm f32 PSVECDotProduct(const register Vec *vec1, const register Vec *vec2)
 {
     nofralloc
@@ -104,7 +130,13 @@ asm f32 PSVECDotProduct(const register Vec *vec1, const register Vec *vec2)
 
     blr
 }
+#else
+f32 PSVECDotProduct(const Vec* vec1, const Vec* vec2) {
+    return vec1->x * vec2->x + vec1->y * vec2->y + vec1->z * vec2->z;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 asm void PSVECCrossProduct
 (
     const register Vec *vec1,
@@ -131,6 +163,14 @@ asm void PSVECCrossProduct
 
     blr
 }
+#else
+void PSVECCrossProduct(const Vec* vec1, const Vec* vec2, Vec* dst) {
+    f32 x = vec1->y * vec2->z - vec1->z * vec2->y;
+    f32 y = vec1->z * vec2->x - vec1->x * vec2->z;
+    f32 z = vec1->x * vec2->y - vec1->y * vec2->x;
+    dst->x = x; dst->y = y; dst->z = z;
+}
+#endif
 
 void C_VECHalfAngle(const Vec *a, const Vec *b, Vec *half)
 {
@@ -156,6 +196,7 @@ void C_VECHalfAngle(const Vec *a, const Vec *b, Vec *half)
     }
 }
 
+#if !defined(PORT) /* port version below */
 asm f32 PSVECSquareDistance(const register Vec *a, const register Vec *b)
 {
     nofralloc
@@ -172,3 +213,9 @@ asm f32 PSVECSquareDistance(const register Vec *a, const register Vec *b)
 
     blr
 }
+#else
+f32 PSVECSquareDistance(const Vec* a, const Vec* b) {
+    f32 x = a->x - b->x, y = a->y - b->y, z = a->z - b->z;
+    return x * x + y * y + z * z;
+}
+#endif

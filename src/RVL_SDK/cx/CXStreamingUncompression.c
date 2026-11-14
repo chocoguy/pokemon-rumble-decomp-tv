@@ -111,7 +111,7 @@ s32 CXReadUncompHuffman(CXUncompContextHuffman* context, const void* data, u32 l
             u32 select = context->srcTmp >> 31;
             u32 endFlag = (*(vu8*)context->treep << select) & 0x80;
 
-            context->treep = (u8*)(((u32)context->treep & ~1) + (((*context->treep & 0x3F) + 1) * 2) + select);
+            context->treep = (u8*)(((uintptr_t)context->treep & ~1) + (((*context->treep & 0x3F) + 1) * 2) + select);
             context->srcTmp <<= 1;
             context->srcTmpCnt--;
 

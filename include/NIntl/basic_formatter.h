@@ -18,6 +18,13 @@ public:
 
     basic_formatter& operator%(const int& rArg);
     basic_formatter& operator%(const unsigned long& rArg);
+#if defined(PORT)
+    /* u32 is unsigned int on the port, so it needs its own overload to avoid ambiguity. */
+    basic_formatter& operator%(const unsigned int& rArg) {
+        const unsigned long value = rArg;
+        return *this % value;
+    }
+#endif
     basic_formatter& operator%(const float& rArg);
     basic_formatter& operator%(const char* pArg);
     basic_formatter& operator%(const wchar_t* pArg);

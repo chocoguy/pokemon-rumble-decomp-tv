@@ -270,7 +270,11 @@ struct EmitterDesc {
 
 struct EmitterResource {
 private:
+#if defined(PORT)
+    Ptr32<char> name; /* 4-byte slot in the file */
+#else
     char* name;
+#endif
     u32 headersize;
 
 public:
@@ -355,15 +359,15 @@ public:
 
     u8* GetPtclTrack(u16 idx) {
 #if defined(PARTICLE_MANAGER_EMISSION_LAYOUT)
-        u32 offset = idx * sizeof(u8*);
-        offset = static_cast<u32>(offset);
-        return *reinterpret_cast<u8**>(reinterpret_cast<u8*>(GetPtclTrackTbl()) + offset);
+        u32 offset = idx * sizeof(u32);
+        return PortPtr<u8*>(*reinterpret_cast<u32*>(reinterpret_cast<u8*>(GetPtclTrackTbl()) + offset));
 #else
-        return GetPtclTrackTbl()[idx];
+        // The table's slots are 4 bytes in the file; LocateTracks stores 32-bit addresses in them.
+        return PortPtr<u8*>(reinterpret_cast<u32*>(GetPtclTrackTbl())[idx]);
 #endif
     }
     u8* GetEmitTrack(u16 idx) {
-        return GetEmitTrackTbl()[idx];
+        return PortPtr<u8*>(reinterpret_cast<u32*>(GetEmitTrackTbl())[idx]);
     }
 
     void LocateTracks() {
@@ -381,12 +385,12 @@ public:
 
         int i;
         for (i = 0; i < NumPtclTrack(); i++) {
-            pPtclPtrTbl[i] = reinterpret_cast<u32>(pTail);
+            pPtclPtrTbl[i] = PortAddr(pTail);
             pTail += pPtclSizeTbl[i];
         }
 
         for (i = 0; i < NumEmitTrack(); i++) {
-            pEmitPtrTbl[i] = reinterpret_cast<u32>(pTail);
+            pEmitPtrTbl[i] = PortAddr(pTail);
             pTail += pEmitSizeTbl[i];
         }
     }

@@ -101,7 +101,7 @@ void CXUncompressHuffman(const void* srcp, void* destp) {
             u32 node = *treep;
 
             node <<= treeShift;
-            treep = (u8*)(((u32)treep & ~1) + (((*treep & 0x3F) + 1) << 1) + treeShift);
+            treep = (u8*)(((uintptr_t)treep & ~1) + (((*treep & 0x3F) + 1) << 1) + treeShift);
 
             if (node & 0x80) {
                 destTmp >>= dataBit;

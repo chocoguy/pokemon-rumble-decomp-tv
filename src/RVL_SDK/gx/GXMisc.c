@@ -53,12 +53,18 @@ void GXFlush(void) {
     PPCSync();
 }
 
+#if !defined(PORT) /* port version below */
 void GXResetWriteGatherPipe(void) {
     while (PPCMfwpar() & 1) {
     }
 
     PPCMtwpar(OSUncachedToPhysical(0xC008000));
 }
+#else
+void GXResetWriteGatherPipe(void) {
+    /* No write-gather hardware on the port: nothing is buffered outside the pipe. */
+}
+#endif
 
 static void __GXAbortWait(u32 clocks) {
     OSTime time0;
@@ -233,6 +239,7 @@ void GXPokeZMode(GXBool compareEnable, GXCompare func, GXBool updateEnable) {
     GX_PE_REG_WRITE_U16(PE_REG_ZMODE, reg);
 }
 
+#if !defined(PORT) /* port version below */
 void GXPeekARGB(u16 x, u16 y, u32* color) {
     u32 addr;
 
@@ -242,7 +249,15 @@ void GXPeekARGB(u16 x, u16 y, u32* color) {
     SC_PE_PI_EFB_ADDR_SET_TYPE(addr, 0);
     *color = *(u32*)addr;
 }
+#else
+void GXPeekARGB(u16 x, u16 y, u32* color) {
+    /* Reads the embedded framebuffer; port/gx answers from the renderer. */
+    extern u32 PORTGXPeekARGB(u16 x, u16 y);
+    *color = PORTGXPeekARGB(x, y);
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 void GXPeekZ(u16 x, u16 y, u32* z) {
     u32 addr;
 
@@ -252,6 +267,12 @@ void GXPeekZ(u16 x, u16 y, u32* z) {
     SC_PE_PI_EFB_ADDR_SET_TYPE(addr, 1);
     *z = *(u32*)addr;
 }
+#else
+void GXPeekZ(u16 x, u16 y, u32* z) {
+    extern u32 PORTGXPeekZ(u16 x, u16 y);
+    *z = PORTGXPeekZ(x, y);
+}
+#endif
 
 GXDrawSyncCallback GXSetDrawSyncCallback(GXDrawSyncCallback callback) {
     GXDrawSyncCallback oldCallback;

@@ -6,6 +6,12 @@
 namespace nw4r {
 namespace g3d {
 
+#if defined(PORT)
+// Release is AnmObj's key function, so the C++ ABI emits AnmObj's vtable and type info
+// here. The original had no base version (every animation object overrides it).
+void AnmObj::Release() {}
+#endif
+
 NW4R_G3D_RTTI_DEF(AnmObj);
 
 f32 FrameCtrl::smBaseUpdateRate = 1.0f;

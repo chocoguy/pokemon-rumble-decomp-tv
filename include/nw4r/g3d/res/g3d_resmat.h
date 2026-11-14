@@ -403,8 +403,16 @@ public:
 struct ResTexPlttInfoData {
     s32 nameTex;
     s32 namePltt;
+#if defined(PORT)
+    Ptr32<ResTexData> pTexData; /* 4-byte slot in the file */
+#else
     ResTexData *pTexData;
+#endif
+#if defined(PORT)
+    Ptr32<ResPlttData> pPlttData; /* 4-byte slot in the file */
+#else
     ResPlttData *pPlttData;
+#endif
     GXTexMapID mapID;
     GXTlut tlutID;
     GXTexWrapMode wrap_s;

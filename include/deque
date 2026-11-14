@@ -13,9 +13,11 @@ namespace std {
 #if defined(CPLAYERPII_EMISSION_LAYOUT)
 template <> const long& min<long>(const long& a, const long& b);
 
+#if !defined(PORT) /* CodeWarrior-only specialization */
 template <typename Trigger> struct DequeMinimumGeneration {
     friend const long& min<long>(const long& a, const long& b) { return (b < a) ? b : a; }
 };
+#endif
 
 #endif
 template <typename T, typename Allocator> class __cdeque_iterator;
@@ -702,18 +704,22 @@ void __cdeque_buf<T, Allocator>::insert(const iterator& rPos, ForwardIterator& r
 }
 #if defined(CPLAYERPII_EMISSION_LAYOUT)
 
+#if !defined(PORT) /* CodeWarrior-only specialization */
 template <> void __cdeque_buf<void*, allocator<void*> >::swap(__cdeque_buf& rOther);
 template <typename T> struct DequeSwapGeneration {
     friend void __cdeque_buf<void*, allocator<void*> >::swap(__cdeque_buf& rOther) { std::swap(*this, rOther); }
 };
+#endif
 
 template <> template <> void __cdeque_buf<void*, allocator<void*>&>::construct_at_front<__cdeque_iterator<void*, allocator<void*> > >(const __cdeque_iterator<void*, allocator<void*> >& rFirst, const __cdeque_iterator<void*, allocator<void*> >& rLast);
 template <> template <> void __cdeque_buf<void*, allocator<void*>&>::construct_at_end<__cdeque_iterator<void*, allocator<void*> > >(const __cdeque_iterator<void*, allocator<void*> >& rFirst, const __cdeque_iterator<void*, allocator<void*> >& rLast);
 
+#if !defined(PORT) /* CodeWarrior-only specialization */
 template <typename Trigger> struct DequeConstructGeneration {
     friend void __cdeque_buf<void*, allocator<void*>&>::construct_at_front<__cdeque_iterator<void*, allocator<void*> > >(const __cdeque_iterator<void*, allocator<void*> >& rFirst, const __cdeque_iterator<void*, allocator<void*> >& rLast) { construct_at_front(rFirst, rLast, pod_type()); }
     friend void __cdeque_buf<void*, allocator<void*>&>::construct_at_end<__cdeque_iterator<void*, allocator<void*> > >(const __cdeque_iterator<void*, allocator<void*> >& rFirst, const __cdeque_iterator<void*, allocator<void*> >& rLast) { construct_at_end(rFirst, rLast, pod_type()); }
 };
+#endif
 #endif
 
 template <typename T, typename Allocator> class __cdeque_pointer_iterator : public __cdeque_buf<void*, allocator<void*> >::iterator {
@@ -823,11 +829,15 @@ public:
 
 typedef __cdeque_pointer<nw4r::math::VEC3, allocator<nw4r::math::VEC3*> >::void_iterator HistoryPointerIterator;
 
+#if !defined(PORT) /* CodeWarrior-only specialization */
 template <> long distance<HistoryPointerIterator>(HistoryPointerIterator first, HistoryPointerIterator last);
+#endif
 
+#if !defined(PORT) /* CodeWarrior-only specialization */
 template <typename Trigger> struct DequeDistanceGeneration {
     friend long distance<HistoryPointerIterator>(HistoryPointerIterator first, HistoryPointerIterator last) { return __distance(first, last, random_access_iterator_tag()); }
 };
+#endif
 
 #else
     template <typename InputIterator> void insert(const iterator& rPos, InputIterator first, InputIterator last, int) {

@@ -46,7 +46,7 @@ namespace Metrowerks { namespace detail { template<> std::allocator<WorldObjectL
 namespace Metrowerks { namespace detail { template<> std::allocator<BWorldObj*>& CompressedPairStorage<std::allocator<BWorldObj*>,unsigned long,1>::first(); } } 
 namespace Metrowerks { namespace detail { template<> unsigned long& CompressedPairStorage<std::allocator<BWorldObj*>,unsigned long,1>::second(); } } 
 namespace std { namespace detail { template<> template<> tree_node_base* WorldIdTree::find_leaf<int>(const int& rKey,node*& rpPred,bool& rLeft,bool& rLeftmost); } } 
-namespace std { namespace detail { template<> WorldIdTree::iterator::__generic_iterator(const WorldIdTree::iterator& rOther); } } 
+namespace std { namespace detail { template<> template<> WorldIdTree::iterator::__generic_iterator(const WorldIdTree::iterator& rOther); } } 
 namespace std { namespace detail { template<> unsigned long WorldIdTree::size() const; } } 
 namespace std { namespace detail { template<> unsigned long WorldIdTree::max_size() const; } } 
 namespace std { namespace detail { template<> WorldNodeAllocator& WorldIdTree::node_alloc(); } } 

@@ -6,6 +6,12 @@ namespace ut {
 
 NW4R_UT_RTTI_DEF_DERIVED(FileStream, IOStream);
 
+#if defined(PORT)
+// Seek is FileStream's key function, so the C++ ABI emits FileStream's vtable and type
+// info here. The original had no base version (every stream overrides it).
+void FileStream::Seek(s32, u32) {}
+#endif
+
 void FileStream::Cancel() {}
 
 bool FileStream::CancelAsync(StreamCallback, void*) {

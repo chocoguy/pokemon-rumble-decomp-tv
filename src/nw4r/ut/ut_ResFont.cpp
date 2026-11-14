@@ -5,10 +5,17 @@ namespace nw4r {
 namespace ut {
 namespace {
 
+#if defined(PORT)
+// The slot holds an offset from pBase until it is resolved here.
+template <typename T> inline void ResolveOffset(Ptr32<T>& rPtr, void* pBase) {
+    rPtr = reinterpret_cast<T*>(static_cast<char*>(pBase) + static_cast<s32>(rPtr.Raw()));
+}
+#else
 template <typename T> inline void ResolveOffset(T*& rpPtr, void* pBase) {
     rpPtr = reinterpret_cast<T*>(static_cast<char*>(pBase) +
                                  reinterpret_cast<s32>(rpPtr));
 }
+#endif
 
 }
 

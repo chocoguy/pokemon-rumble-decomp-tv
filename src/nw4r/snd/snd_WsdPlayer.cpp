@@ -20,7 +20,7 @@ WsdPlayer::WsdPlayer() :
 }
 
 void WsdPlayer::InitParam(int voiceOutCount, WsdCallback const *callback,
-                          u32 callbackData)
+                          uintptr_t callbackData)
 {
 	BasicPlayer::InitParam();
 
@@ -51,7 +51,7 @@ void WsdPlayer::InitParam(int voiceOutCount, WsdCallback const *callback,
 bool WsdPlayer::Prepare(void const *waveSoundBase, int index,
                         StartOffsetType startOffsetType, int startOffset,
                         int voiceOutCount, WsdCallback const *callback,
-                        u32 callbackData)
+                        uintptr_t callbackData)
 {
 	SoundThread::AutoLock lock;
 
@@ -201,7 +201,7 @@ void WsdPlayer::Update()
 }
 
 bool WsdPlayer::StartChannel(WsdCallback const *callback,
-                             u32 callbackData)
+                             uintptr_t callbackData)
 {
 	SoundThread::AutoLock lock;
 
@@ -231,7 +231,7 @@ bool WsdPlayer::StartChannel(WsdCallback const *callback,
 
 	Channel *channel = Channel::AllocChannel(
 		ut::Min(waveData.numChannels, CHANNEL_MAX), GetVoiceOutCount(),
-		priority, ChannelCallbackFunc, reinterpret_cast<u32>(this));
+		priority, ChannelCallbackFunc, reinterpret_cast<uintptr_t>(this));
 	if (!channel)
 		return false;
 
@@ -357,7 +357,7 @@ void WsdPlayer::UpdateChannel()
 
 void WsdPlayer::ChannelCallbackFunc(Channel *dropChannel,
                                     Channel::ChannelCallbackStatus status,
-                                    u32 userData)
+                                    uintptr_t userData)
 {
 	SoundThread::AutoLock lock;
 

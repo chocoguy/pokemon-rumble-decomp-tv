@@ -81,7 +81,7 @@ static std::wstring Format(NPpu::CEngine* pEngine, int count, const wchar_t* pFo
             formatter % value.ToInt();
             break;
         case NPpu::Slice::TYPE_REFERENCE:
-            formatter % reinterpret_cast<int>(value.GetReference());
+            formatter % static_cast<int>(PortAddr(value.GetReference()));
             break;
         default:
             formatter % 0;
@@ -116,7 +116,7 @@ static std::string Format(NPpu::CEngine* pEngine, int count, const char* pFormat
             formatter % value.ToInt();
             break;
         case NPpu::Slice::TYPE_REFERENCE:
-            formatter % reinterpret_cast<int>(value.GetReference());
+            formatter % static_cast<int>(PortAddr(value.GetReference()));
             break;
         default:
             formatter % 0;

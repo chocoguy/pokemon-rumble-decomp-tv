@@ -18,6 +18,7 @@ using nw4r::math::MTX34;
 using nw4r::math::VEC3;
 
 const f32 norm_epsilon = 1e-18f;
+#if !defined(PORT) /* port version below */
 asm void GetModelLocalAxisY2(
     register math::VEC3 *pVec, register const math::MTX34 *pModelMtx, register const math::MTX34 *pParentModelMtx
 ) {
@@ -73,7 +74,33 @@ _lbl_8044F884:
     blr
 
 }
+#else
+void GetModelLocalAxisY2(math::VEC3* pVec, const math::MTX34* pModelMtx, const math::MTX34* pParentModelMtx) {
+    // x and y of pModelMtx * inverse(parent's 3x3) applied to +Y; z is 0. All zero when
+    // the parent is singular (|det| < norm_epsilon).
+    const math::MTX34& p = *pParentModelMtx;
+    const math::MTX34& m = *pModelMtx;
+    const f32 c00 = p._11 * p._22 - p._21 * p._12;
+    const f32 c10 = p._21 * p._02 - p._01 * p._22;
+    const f32 c20 = p._01 * p._12 - p._11 * p._02;
+    const f32 det = p._00 * c00 + p._10 * c10 + p._20 * c20;
+    pVec->z = 0.0f;
+    if (!(__builtin_fabsf(det) >= norm_epsilon)) {
+        pVec->x = 0.0f;
+        pVec->y = 0.0f;
+        return;
+    }
+    const f32 inv = 1.0f / det;
+    // Column 1 of the parent's inverse.
+    const f32 i01 = c10 * inv;
+    const f32 i11 = (p._22 * p._00 - p._02 * p._20) * inv;
+    const f32 i21 = (p._01 * p._20 - p._00 * p._21) * inv;
+    pVec->x = m._00 * i01 + m._01 * i11 + m._02 * i21;
+    pVec->y = m._10 * i01 + m._11 * i11 + m._12 * i21;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 asm void GetModelLocalAxisY3(
     register math::VEC3 *pVec, register const math::MTX34 *pModelMtx, register const math::MTX34 *pParentModelMtx
 ) {
@@ -136,7 +163,35 @@ _lbl_8044F944:
     blr
 
 }
+#else
+void GetModelLocalAxisY3(math::VEC3* pVec, const math::MTX34* pModelMtx, const math::MTX34* pParentModelMtx) {
+    // As GetModelLocalAxisY2, with z as well. The shipped code computes z from a register
+    // whose second lane is (_02 - _22) / det of the parent, not that column's _11 term, so
+    // z = m._20 * i21 + m._21 * k + m._22 * i21 with k = (p._02 - p._22) / det. Reproduced as is.
+    const math::MTX34& p = *pParentModelMtx;
+    const math::MTX34& m = *pModelMtx;
+    const f32 c00 = p._11 * p._22 - p._21 * p._12;
+    const f32 c10 = p._21 * p._02 - p._01 * p._22;
+    const f32 c20 = p._01 * p._12 - p._11 * p._02;
+    const f32 det = p._00 * c00 + p._10 * c10 + p._20 * c20;
+    pVec->z = 0.0f;
+    if (!(__builtin_fabsf(det) >= norm_epsilon)) {
+        pVec->x = 0.0f;
+        pVec->y = 0.0f;
+        return;
+    }
+    const f32 inv = 1.0f / det;
+    const f32 i01 = c10 * inv;
+    const f32 i11 = (p._22 * p._00 - p._02 * p._20) * inv;
+    const f32 i21 = (p._01 * p._20 - p._00 * p._21) * inv;
+    const f32 k = (p._02 - p._22) * inv;
+    pVec->x = m._00 * i01 + m._01 * i11 + m._02 * i21;
+    pVec->y = m._10 * i01 + m._11 * i11 + m._12 * i21;
+    pVec->z = m._22 * i21 + (m._20 * i21 + m._21 * k);
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 inline void SetMdlViewMtxSR(register math::MTX34 *pViewPos, register const math::VEC3 &rRY, register f32 s) {
     register f32 work0, work1;
     register f32 c_zero = 0.0f;
@@ -156,7 +211,16 @@ inline void SetMdlViewMtxSR(register math::MTX34 *pViewPos, register const math:
     }
 
 }
+#else
+inline void SetMdlViewMtxSR(math::MTX34* pViewPos, const math::VEC3& rRY, f32 s) {
+    // A rotation about the view's z axis that sends +Y to rRY, scaled; translation untouched.
+    pViewPos->_00 = rRY.y * s;  pViewPos->_01 = rRY.x * s; pViewPos->_02 = 0.0f;
+    pViewPos->_10 = -rRY.x * s; pViewPos->_11 = rRY.y * s; pViewPos->_12 = 0.0f;
+    pViewPos->_20 = 0.0f;       pViewPos->_21 = 0.0f;      pViewPos->_22 = s;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 inline void SetMdlViewMtxSR(
     register math::MTX34 *pViewPos, register const math::VEC3 &rRY, register f32 sx, register f32 sy, register f32 sz
 ) {
@@ -180,7 +244,16 @@ inline void SetMdlViewMtxSR(
     }
 
 }
+#else
+inline void SetMdlViewMtxSR(math::MTX34* pViewPos, const math::VEC3& rRY, f32 sx, f32 sy, f32 sz) {
+    // A rotation about the view's z axis that sends +Y to rRY, scaled; translation untouched.
+    pViewPos->_00 = rRY.y * sx;  pViewPos->_01 = rRY.x * sy; pViewPos->_02 = 0.0f;
+    pViewPos->_10 = -rRY.x * sx; pViewPos->_11 = rRY.y * sy; pViewPos->_12 = 0.0f;
+    pViewPos->_20 = 0.0f;        pViewPos->_21 = 0.0f;       pViewPos->_22 = sz;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 inline void SetMdlViewMtxSR(
     register math::MTX34 *pViewPos, register const math::VEC3 &rRX, register const math::VEC3 &rRY,
     register const math::VEC3 &rRZ, register f32 sx, register f32 sy, register f32 sz
@@ -213,6 +286,15 @@ inline void SetMdlViewMtxSR(
     }
 
 }
+#else
+inline void SetMdlViewMtxSR(math::MTX34* pViewPos, const math::VEC3& rRX, const math::VEC3& rRY, const math::VEC3& rRZ,
+                            f32 sx, f32 sy, f32 sz) {
+    // Columns are the scaled axes; translation untouched.
+    pViewPos->_00 = rRX.x * sx; pViewPos->_01 = rRY.x * sy; pViewPos->_02 = rRZ.x * sz;
+    pViewPos->_10 = rRX.y * sx; pViewPos->_11 = rRY.y * sy; pViewPos->_12 = rRZ.y * sz;
+    pViewPos->_20 = rRX.z * sx; pViewPos->_21 = rRY.z * sy; pViewPos->_22 = rRZ.z * sz;
+}
+#endif
 
 }
 

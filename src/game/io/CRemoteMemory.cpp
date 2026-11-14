@@ -11,7 +11,7 @@
 
 #pragma opt_optimizecontrolflow off
 
-void SetPadConnectionCallback(int channel, void (*pCallback)(long, long));
+void SetPadConnectionCallback(int channel, void (*pCallback)(s32, s32));
 extern "C" u32 OSCalcCRC32(const void* pData, u32 size);
 std::tr1::shared_ptr<CPiiPersonalData> CreatePiiPersonalData(const COyaInfo* pOyaInfo, const SD_PiiPersonalData::Data& rData);
 std::tr1::shared_ptr<CPpuEnv> CreateScriptEnvironment();
@@ -59,10 +59,10 @@ u8* sThreadStack;
 bool sInitialized;
 
 void OnRetryAlarm(OSAlarm* pAlarm, OSContext* pContext);
-void OnPadConnection(long channel, long result);
-void OnRead(long channel, long result);
-void OnWrite(long channel, long result);
-void OnReadBack(long channel, long result);
+void OnPadConnection(s32 channel, s32 result);
+void OnRead(s32 channel, s32 result);
+void OnWrite(s32 channel, s32 result);
+void OnReadBack(s32 channel, s32 result);
 
 u32 FindValidBlock(RemoteDataBlock* pBlocks) {
     pBlocks = static_cast<RemoteDataBlock*>(pBlocks);
@@ -252,7 +252,7 @@ void* CRemoteMemory::ThreadMain(void*) {
     OSMessage message;
     for (;;) {
         OSReceiveMessage(&sMessageQueue, &message, OS_MESSAGE_BLOCK);
-        const u32 command = reinterpret_cast<u32>(message);
+        const u32 command = static_cast<u32>(reinterpret_cast<uintptr_t>(message)); // a command code, not a pointer
         const u32 type = command >> 16;
         const int channel = static_cast<u16>(command);
         switch (type) {
@@ -277,7 +277,7 @@ void* CRemoteMemory::ThreadMain(void*) {
             case -3:
             case -2:
                 if (++pRemote->mTransferRetries < 3) {
-                    ScheduleRetry(&sAlarms[channel + 1], reinterpret_cast<OSMessage>(channel | 0x50000), OS_MSEC_TO_TICKS(1000));
+                    ScheduleRetry(&sAlarms[channel + 1], reinterpret_cast<OSMessage>(static_cast<uintptr_t>(channel | 0x50000)), OS_MSEC_TO_TICKS(1000));
                 } else {
                     pRemote->mFlags = (pRemote->mFlags & ~FLAG_BUSY) | FLAG_TRANSFER_ERROR;
                 }
@@ -314,24 +314,24 @@ void OnRetryAlarm(OSAlarm* pAlarm, OSContext*) {
     OSSendMessage(&sMessageQueue, OSGetAlarmUserData(pAlarm), 0);
 }
 
-void OnPadConnection(long channel, long result) {
+void OnPadConnection(s32 channel, s32 result) {
     sConnectionResults[channel] = result;
-    OSSendMessage(&sMessageQueue, reinterpret_cast<OSMessage>(static_cast<u16>(channel)), 0);
+    OSSendMessage(&sMessageQueue, reinterpret_cast<OSMessage>(static_cast<uintptr_t>(static_cast<u16>(channel))), 0);
 }
 
-void OnRead(long channel, long result) {
+void OnRead(s32 channel, s32 result) {
     sTransferResults[channel] = result;
-    OSSendMessage(&sMessageQueue, reinterpret_cast<OSMessage>(static_cast<u16>(channel) | 0x10000), 0);
+    OSSendMessage(&sMessageQueue, reinterpret_cast<OSMessage>(static_cast<uintptr_t>(static_cast<u16>(channel) | 0x10000)), 0);
 }
 
-void OnWrite(long channel, long result) {
+void OnWrite(s32 channel, s32 result) {
     sTransferResults[channel] = result;
-    OSSendMessage(&sMessageQueue, reinterpret_cast<OSMessage>(static_cast<u16>(channel) | 0x20000), 0);
+    OSSendMessage(&sMessageQueue, reinterpret_cast<OSMessage>(static_cast<uintptr_t>(static_cast<u16>(channel) | 0x20000)), 0);
 }
 
-void OnReadBack(long channel, long result) {
+void OnReadBack(s32 channel, s32 result) {
     sTransferResults[channel] = result;
-    OSSendMessage(&sMessageQueue, reinterpret_cast<OSMessage>(static_cast<u16>(channel) | 0x30000), 0);
+    OSSendMessage(&sMessageQueue, reinterpret_cast<OSMessage>(static_cast<uintptr_t>(static_cast<u16>(channel) | 0x30000)), 0);
 }
 
 }
@@ -346,7 +346,7 @@ void InitializeCalculationWorker() {
 }
 
 void ShutdownCalculationWorker() {
-    OSSendMessage(&sMessageQueue, reinterpret_cast<OSMessage>(0x7ffff), 0);
+    OSSendMessage(&sMessageQueue, reinterpret_cast<OSMessage>(static_cast<uintptr_t>(0x7ffff)), 0);
     void* pResult;
     OSJoinThread(&sThread, &pResult);
     GameMemory::Free(sThreadStack);
@@ -492,7 +492,7 @@ void CRemoteMemory::FinishRead(int channel, long result) {
     case -2:
     case -3:
         if (++pRemote->mTransferRetries < 3) {
-            ScheduleReadRetry(&sAlarms[channel + 1], reinterpret_cast<OSMessage>(static_cast<u16>(channel) | 0x40000), MakeRemoteRetryDelay(OS_MSEC_TO_TICKS(1000)));
+            ScheduleReadRetry(&sAlarms[channel + 1], reinterpret_cast<OSMessage>(static_cast<uintptr_t>(static_cast<u16>(channel) | 0x40000)), MakeRemoteRetryDelay(OS_MSEC_TO_TICKS(1000)));
         } else {
             pRemote->mFlags &= ~(FLAG_CONNECTION_CHANGED | FLAG_RETRY_PENDING);
             SetFinishRemoteState(pRemote->mFlags, FLAG_DISCONNECTED);
@@ -677,7 +677,7 @@ void CRemoteMemory::FinishWrite(int channel, long result) {
     case -3:
         if (++pRemote->mTransferRetries < 3) {
             delay = OS_MSEC_TO_TICKS(1000);
-            message = reinterpret_cast<OSMessage>(static_cast<u16>(channel) | 0x60000);
+            message = reinterpret_cast<OSMessage>(static_cast<uintptr_t>(static_cast<u16>(channel) | 0x60000));
             pAlarm = &sAlarms[channel + 1];
             OSCancelAlarm(pAlarm);
             OSSetAlarmUserData(pAlarm, message);

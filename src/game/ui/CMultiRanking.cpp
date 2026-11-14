@@ -16,7 +16,7 @@
 #include <game/text/StringFormat.h>
 #include <nw4r/g3d/g3d_scnmdlsmpl.h>
 
-void ChangeBGM(unsigned long id);
+void ChangeBGM(u32 id);
 
 nw4r::math::VEC3 GetNodePosition(std::tr1::shared_ptr<BModelObj> pObj, const char* pName) {
     if (pObj && pObj->GetModel()) {

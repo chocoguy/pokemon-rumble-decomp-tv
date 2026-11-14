@@ -29,7 +29,7 @@ WaveSound::WaveSound(SoundInstanceManager<WaveSound> *manager, int priority,
 bool WaveSound::Prepare(void const *waveSoundBase, s32 waveSoundOffset,
                         WsdPlayer::StartOffsetType startOffsetType, s32 offset,
                         WsdPlayer::WsdCallback const *callback,
-                        u32 callbackData)
+                        uintptr_t callbackData)
 {
 
 	InitParam();

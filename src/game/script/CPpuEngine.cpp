@@ -93,7 +93,7 @@ bool CPpuEngine::LoadPlacement(const char* pFileName, const char* pAnmName, cons
     placements.reserve(nodeCount);
     for (u32 i = 0; i < nodeCount; i++) {
         const nw4r::g3d::ResAnmChrNodeData& rNode = *anm.GetNodeAnm(i);
-        if (strncmp(reinterpret_cast<const char*>(rNode.name + reinterpret_cast<u32>(&rNode)), pNodePrefix, prefixLength) == 0) {
+        if (strncmp(reinterpret_cast<const char*>(rNode.name + reinterpret_cast<uintptr_t>(&rNode)), pNodePrefix, prefixLength) == 0) {
             nw4r::g3d::ChrAnmResult result;
             anm.GetAnmResult(&result, i, 0.0f);
             nw4r::math::MTX34 mtx;
@@ -230,7 +230,7 @@ const PiiSpeciesData* CPpuEngine::PopSpeciesData() {
     if (id == 0) {
         return nullptr;
     }
-    return reinterpret_cast<const PiiSpeciesData*>(id);
+    return PortPtr<const PiiSpeciesData*>(static_cast<u32>(id)); // scripts hold it as a 32-bit game address
 }
 
 std::tr1::shared_ptr<CPiiPersonalData> CPpuEngine::PopPersonalData() {

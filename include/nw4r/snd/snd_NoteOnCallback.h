@@ -19,7 +19,7 @@ struct NoteOnInfo {
     int priority;
     int voiceOutCount;
     Channel::ChannelCallback channelCallback;
-    u32 channelCallbackData;
+    uintptr_t channelCallbackData; // carries a pointer
 };
 
 class NoteOnCallback {

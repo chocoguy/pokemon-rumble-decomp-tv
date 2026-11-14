@@ -193,8 +193,7 @@ BankFileReader::GetReferenceToSubRegion(const BankFile::DataRegion* pRef,
         u32 offset = index * sizeof(BankFile::DataRegion) +
                      ut::RoundUp(pTable->tableSize + 1, 4);
 
-        pSub = static_cast<const BankFile::DataRegion*>(ut::AddOffsetToPtr(
-            reinterpret_cast<const void*>(offset), ut::GetIntPtr(pTable)));
+        pSub = static_cast<const BankFile::DataRegion*>(ut::AddOffsetToPtr(pTable, offset));
         break;
     }
 

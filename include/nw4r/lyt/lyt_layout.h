@@ -111,9 +111,18 @@ public:
         }
     }
 
+    template <typename T> static void DestroyObj(T* pObject) {
+        pObject->~T();
+    }
+    template <typename T, size_t N> static void DestroyObj(T (*pObject)[N]) {
+        for (size_t i = 0; i < N; i++) {
+            DestroyObj(&(*pObject)[i]);
+        }
+    }
+
     template <typename T> static void DeleteObj(T* pObject) {
         if (pObject != nullptr) {
-            pObject->~T();
+            DestroyObj(pObject);
             FreeMemory(pObject);
         }
     }

@@ -46,6 +46,7 @@ f32 CosFIdx(f32 fidx) {
     return cos;
 }
 
+#if !defined(PORT) /* port version below */
 void SinCosFIdx(register f32* pSin, register f32* pCos, register f32 fidx) {
     register u32 idx;
     register f32 abs_fidx;
@@ -91,6 +92,22 @@ void SinCosFIdx(register f32* pSin, register f32* pCos, register f32 fidx) {
         psq_st result, 0(pSin), 1, 0;
     )
 }
+#else
+void SinCosFIdx(f32* pSin, f32* pCos, f32 fidx) {
+    // Same lookup as SinFIdx and CosFIdx: 256 table entries per turn, linear interpolation.
+    f32 abs_fidx = FAbs(fidx);
+    while (abs_fidx > 65536.0f) {
+        abs_fidx -= 65536.0f;
+    }
+    u16 whole = F32ToU16(abs_fidx);
+    f32 frac = abs_fidx - U16ToF32(whole);
+    const detail::SinCosSample& rSample = detail::gSinCosTbl[whole & 255];
+    // ps_madds0 in the original: fused, unlike SinFIdx and CosFIdx.
+    f32 sin = __builtin_fmaf(rSample.sin_delta, frac, rSample.sin_val);
+    *pCos = __builtin_fmaf(rSample.cos_delta, frac, rSample.cos_val);
+    *pSin = (fidx < 0.0f) ? -sin : sin;
+}
+#endif
 
 namespace detail {
 

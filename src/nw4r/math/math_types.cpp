@@ -15,6 +15,7 @@
 namespace nw4r {
 namespace math {
 
+#if !defined(PORT) /* port version below */
 VEC3* VEC3Maximize(VEC3* pOut, const VEC3* pA, const VEC3* pB) {
     register f32 fx, fy;
     register f32 dt, work;
@@ -30,7 +31,17 @@ VEC3* VEC3Maximize(VEC3* pOut, const VEC3* pA, const VEC3* pB) {
 
     return pOut;
 }
+#else
+VEC3* VEC3Maximize(VEC3* pOut, const VEC3* pA, const VEC3* pB) {
+    // fsel(a - b, a, b): a when a - b >= 0, otherwise b (also when the difference is NaN).
+    pOut->x = (pA->x - pB->x >= 0.0f) ? pA->x : pB->x;
+    pOut->y = (pA->y - pB->y >= 0.0f) ? pA->y : pB->y;
+    pOut->z = (pA->z - pB->z >= 0.0f) ? pA->z : pB->z;
+    return pOut;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 VEC3* VEC3Minimize(VEC3* pOut, const VEC3* pA, const VEC3* pB) {
     register f32 fx, fy;
     register f32 dt, work;
@@ -46,7 +57,17 @@ VEC3* VEC3Minimize(VEC3* pOut, const VEC3* pA, const VEC3* pB) {
 
     return pOut;
 }
+#else
+VEC3* VEC3Minimize(VEC3* pOut, const VEC3* pA, const VEC3* pB) {
+    // fsel(b - a, a, b)
+    pOut->x = (pB->x - pA->x >= 0.0f) ? pA->x : pB->x;
+    pOut->y = (pB->y - pA->y >= 0.0f) ? pA->y : pB->y;
+    pOut->z = (pB->z - pA->z >= 0.0f) ? pA->z : pB->z;
+    return pOut;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 MTX33* MTX33Identity(register MTX33* pMtx) {
     register f32 c_00 = 0.0f, c_10 = 1.0f;
     register f32 c_11;
@@ -64,7 +85,16 @@ MTX33* MTX33Identity(register MTX33* pMtx) {
 
     return pMtx;
 }
+#else
+MTX33* MTX33Identity(MTX33* pMtx) {
+    pMtx->_00 = 1.0f; pMtx->_01 = 0.0f; pMtx->_02 = 0.0f;
+    pMtx->_10 = 0.0f; pMtx->_11 = 1.0f; pMtx->_12 = 0.0f;
+    pMtx->_20 = 0.0f; pMtx->_21 = 0.0f; pMtx->_22 = 1.0f;
+    return pMtx;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 MTX33* MTX34ToMTX33(register MTX33* pOut, register const MTX34* pIn) {
     register f32 row0a, row0b, row1a, row1b, row2a, row2b;
 
@@ -86,7 +116,16 @@ MTX33* MTX34ToMTX33(register MTX33* pOut, register const MTX34* pIn) {
 
     return pOut;
 }
+#else
+MTX33* MTX34ToMTX33(MTX33* pOut, const MTX34* pIn) {
+    pOut->_00 = pIn->_00; pOut->_01 = pIn->_01; pOut->_02 = pIn->_02;
+    pOut->_10 = pIn->_10; pOut->_11 = pIn->_11; pOut->_12 = pIn->_12;
+    pOut->_20 = pIn->_20; pOut->_21 = pIn->_21; pOut->_22 = pIn->_22;
+    return pOut;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 asm u32 MTX34InvTranspose(register MTX33* pOut, register const MTX34* pIn) {
     nofralloc
 
@@ -150,7 +189,31 @@ inverse_exists:
     blr
 
 }
+#else
+u32 MTX34InvTranspose(MTX33* pOut, const MTX34* pIn) {
+    // Inverse transpose of the 3x3 part: the cofactor matrix divided by the determinant.
+    const f32 c00 = pIn->_11 * pIn->_22 - pIn->_12 * pIn->_21;
+    const f32 c01 = pIn->_12 * pIn->_20 - pIn->_10 * pIn->_22;
+    const f32 c02 = pIn->_10 * pIn->_21 - pIn->_11 * pIn->_20;
+    const f32 c10 = pIn->_02 * pIn->_21 - pIn->_01 * pIn->_22;
+    const f32 c11 = pIn->_00 * pIn->_22 - pIn->_02 * pIn->_20;
+    const f32 c12 = pIn->_01 * pIn->_20 - pIn->_00 * pIn->_21;
+    const f32 c20 = pIn->_01 * pIn->_12 - pIn->_02 * pIn->_11;
+    const f32 c21 = pIn->_02 * pIn->_10 - pIn->_00 * pIn->_12;
+    const f32 c22 = pIn->_00 * pIn->_11 - pIn->_01 * pIn->_10;
+    const f32 det = pIn->_00 * c00 + pIn->_01 * c01 + pIn->_02 * c02;
+    if (det == 0.0f) {
+        return FALSE;
+    }
+    const f32 inv = 1.0f / det;
+    pOut->_00 = c00 * inv; pOut->_01 = c01 * inv; pOut->_02 = c02 * inv;
+    pOut->_10 = c10 * inv; pOut->_11 = c11 * inv; pOut->_12 = c12 * inv;
+    pOut->_20 = c20 * inv; pOut->_21 = c21 * inv; pOut->_22 = c22 * inv;
+    return TRUE;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 MTX34* MTX34Zero(register MTX34* pMtx) {
     register f32 c_zero = 0.0f;
 
@@ -165,7 +228,16 @@ MTX34* MTX34Zero(register MTX34* pMtx) {
 
     return pMtx;
 }
+#else
+MTX34* MTX34Zero(MTX34* pMtx) {
+    pMtx->_00 = pMtx->_01 = pMtx->_02 = pMtx->_03 = 0.0f;
+    pMtx->_10 = pMtx->_11 = pMtx->_12 = pMtx->_13 = 0.0f;
+    pMtx->_20 = pMtx->_21 = pMtx->_22 = pMtx->_23 = 0.0f;
+    return pMtx;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 MTX34* MTX34Scale(register MTX34* pOut, register const MTX34* pIn,
                   register const VEC3* pScale) {
     register f32 xy, z;
@@ -201,7 +273,18 @@ MTX34* MTX34Scale(register MTX34* pOut, register const MTX34* pIn,
 
     return pOut;
 }
+#else
+MTX34* MTX34Scale(MTX34* pOut, const MTX34* pIn, const VEC3* pScale) {
+    // pIn * scale: columns 0-2 scaled, translation kept.
+    const f32 x = pScale->x, y = pScale->y, z = pScale->z;
+    pOut->_00 = pIn->_00 * x; pOut->_01 = pIn->_01 * y; pOut->_02 = pIn->_02 * z; pOut->_03 = pIn->_03;
+    pOut->_10 = pIn->_10 * x; pOut->_11 = pIn->_11 * y; pOut->_12 = pIn->_12 * z; pOut->_13 = pIn->_13;
+    pOut->_20 = pIn->_20 * x; pOut->_21 = pIn->_21 * y; pOut->_22 = pIn->_22 * z; pOut->_23 = pIn->_23;
+    return pOut;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 MTX34* MTX34Trans(register MTX34* pOut, register const MTX34* pIn,
                   register const VEC3* pTrans) {
     register f32 xy, z;
@@ -246,6 +329,19 @@ MTX34* MTX34Trans(register MTX34* pOut, register const MTX34* pIn,
 
     return pOut;
 }
+#else
+MTX34* MTX34Trans(MTX34* pOut, const MTX34* pIn, const VEC3* pTrans) {
+    // pIn * translation: the 3x3 part kept, the translation moved by pIn applied to pTrans.
+    const f32 x = pTrans->x, y = pTrans->y, z = pTrans->z;
+    const f32 t0 = pIn->_00 * x + pIn->_01 * y + pIn->_02 * z + pIn->_03;
+    const f32 t1 = pIn->_10 * x + pIn->_11 * y + pIn->_12 * z + pIn->_13;
+    const f32 t2 = pIn->_20 * x + pIn->_21 * y + pIn->_22 * z + pIn->_23;
+    pOut->_00 = pIn->_00; pOut->_01 = pIn->_01; pOut->_02 = pIn->_02; pOut->_03 = t0;
+    pOut->_10 = pIn->_10; pOut->_11 = pIn->_11; pOut->_12 = pIn->_12; pOut->_13 = t1;
+    pOut->_20 = pIn->_20; pOut->_21 = pIn->_21; pOut->_22 = pIn->_22; pOut->_23 = t2;
+    return pOut;
+}
+#endif
 
 MTX34* MTX34RotAxisFIdx(MTX34* pMtx, const VEC3* pAxis, f32 fidx) {
     PSMTXRotAxisRad(*pMtx, *pAxis, NW4R_MATH_FIDX_TO_RAD(fidx));
@@ -256,6 +352,7 @@ using detail::gSinCosTbl;
 
 static const f32 sFIdxRange[2] = {65536.0f, 65536.0f};
 
+#if !defined(PORT) /* port version below */
 asm MTX34* MTX34RotXYZFIdx(register MTX34* pMtx, register f32 fx, register f32 fy, register f32 fz) {
     nofralloc
     ps_merge00 f6, fx, fy
@@ -358,6 +455,31 @@ _z_pos:
     addi r1, r1, 0x10
     blr
 }
+#else
+MTX34* MTX34RotXYZFIdx(MTX34* pMtx, f32 fx, f32 fy, f32 fz) {
+    // Rz * Ry * Rx, angles in table units (256 per turn), no translation.
+    f32 sinx, cosx, siny, cosy, sinz, cosz;
+    SinCosFIdx(&sinx, &cosx, fx);
+    SinCosFIdx(&siny, &cosy, fy);
+    SinCosFIdx(&sinz, &cosz, fz);
+    const f32 cxcz = cosx * cosz;
+    const f32 sxsy = sinx * siny;
+    const f32 cxsz = cosx * sinz;
+    pMtx->_00 = cosz * cosy;
+    pMtx->_10 = sinz * cosy;
+    pMtx->_20 = -siny;
+    pMtx->_01 = sxsy * cosz - cxsz;
+    pMtx->_11 = sxsy * sinz + cxcz;
+    pMtx->_21 = sinx * cosy;
+    pMtx->_02 = cxcz * siny + sinx * sinz;
+    pMtx->_12 = cxsz * siny - sinx * cosz;
+    pMtx->_22 = cosx * cosy;
+    pMtx->_03 = 0.0f;
+    pMtx->_13 = 0.0f;
+    pMtx->_23 = 0.0f;
+    return pMtx;
+}
+#endif
 
 VEC3* VEC3TransformNormal(VEC3* pOut, const MTX34* pMtx, const VEC3* pVec) {
     VEC3 tmp;
@@ -372,6 +494,7 @@ VEC3* VEC3TransformNormal(VEC3* pOut, const MTX34* pMtx, const VEC3* pVec) {
     return pOut;
 }
 
+#if !defined(PORT) /* port version below */
 MTX44* MTX44Identity(register MTX44* pMtx) {
     register f32 c_zero = 0.0f, c_one = 1.0f;
     register f32 c_01, c_10;
@@ -392,7 +515,17 @@ MTX44* MTX44Identity(register MTX44* pMtx) {
 
     return pMtx;
 }
+#else
+MTX44* MTX44Identity(MTX44* pMtx) {
+    pMtx->_00 = 1.0f; pMtx->_01 = 0.0f; pMtx->_02 = 0.0f; pMtx->_03 = 0.0f;
+    pMtx->_10 = 0.0f; pMtx->_11 = 1.0f; pMtx->_12 = 0.0f; pMtx->_13 = 0.0f;
+    pMtx->_20 = 0.0f; pMtx->_21 = 0.0f; pMtx->_22 = 1.0f; pMtx->_23 = 0.0f;
+    pMtx->_30 = 0.0f; pMtx->_31 = 0.0f; pMtx->_32 = 0.0f; pMtx->_33 = 1.0f;
+    return pMtx;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 MTX44* MTX44Copy(register MTX44* pDst, register const MTX44* pSrc) {
     register f32 row0a, row0b;
     register f32 row1a, row1b;
@@ -421,6 +554,14 @@ MTX44* MTX44Copy(register MTX44* pDst, register const MTX44* pSrc) {
 
     return pDst;
 }
+#else
+MTX44* MTX44Copy(MTX44* pDst, const MTX44* pSrc) {
+    if (pDst != pSrc) {
+        *pDst = *pSrc;
+    }
+    return pDst;
+}
+#endif
 
 VEC3* VEC3TransformCoord(VEC3* pOut, const MTX44* pMtx, const VEC3* pVec) {
     VEC3 tmp;

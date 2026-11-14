@@ -3,6 +3,25 @@
 
 #include "revolution/types.h"
 
+#if defined(PORT)
+/* Hardware registers have no fixed address on the port. The SDK code that is still
+ * compiled reads and writes them as ordinary memory, defined in port/os. */
+#ifdef __cplusplus
+extern "C" {
+#endif
+extern vu16 __VIRegs[0x3B];
+extern vu32 __PIRegs[0xC];
+extern vu16 __MEMRegs[0x40];
+extern vu16 __DSPRegs[0x20];
+extern vu32 __EXIRegs[0x10];
+extern vu32 __AIRegs[0x8];
+extern vu32 __ACRRegs[0x59];
+extern vu32 __DIRegs[0x10];
+extern vu32 __SIRegs[0x40];
+#ifdef __cplusplus
+}
+#endif
+#else
 vu16 __VIRegs[0x3B] : 0xCC002000;
 vu32 __PIRegs[0xC] : 0xCC003000;
 vu16 __MEMRegs[0x40] : 0xCC004000;
@@ -12,5 +31,6 @@ vu32 __AIRegs[0x8] : 0xCD006C00;
 vu32 __ACRRegs[0x59] : 0xCD000000;
 vu32 __DIRegs[0x10] : 0xCD006000;
 vu32 __SIRegs[0x40] : 0xCD006400;
+#endif
 
 #endif

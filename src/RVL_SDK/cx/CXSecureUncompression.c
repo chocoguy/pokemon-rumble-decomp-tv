@@ -170,7 +170,7 @@ s32 CXSecureUncompressLZ(const void* srcp, u32 srcSize, void* destp) {
                     return CX_ERR_DEST_OVERRUN;
                 }
 
-                if ((u32)&pDst[-offset] < (u32)destp) {
+                if ((uintptr_t)&pDst[-offset] < (uintptr_t)destp) {
                     return CX_ERR_DEST_OVERRUN;
                 }
 
@@ -216,20 +216,20 @@ BOOL CXiVerifyHuffmanTable_(const void* pTable, u8 bit) {
 
     for (idx = 1, treep = treeStartp; treep < treeEndp; idx++, treep++) {
         u32 offset;
-        u32 nodep;
+        uintptr_t nodep;
 
         if (end_flags[idx / 8] & (1 << (idx % 8))) {
             continue;
         }
 
         offset = ((*treep & 0x3F) + 1) << 1;
-        nodep = (((u32)treep >> 1) << 1) + offset;
+        nodep = (((uintptr_t)treep >> 1) << 1) + offset;
 
         if (*treep == 0 && idx >= (treeSize << 1)) {
             continue;
         }
 
-        if (nodep >= (u32)treeEndp) {
+        if (nodep >= (uintptr_t)treeEndp) {
             return FALSE;
         }
 
@@ -286,7 +286,7 @@ s32 CXSecureUncompressHuffman(const void* srcp, u32 srcSize, void* destp) {
     }
 
     pSrc = treep + treeSize;
-    srcCount -= (u32)pSrc - (u32)srcp;
+    srcCount -= (uintptr_t)pSrc - (uintptr_t)srcp;
 
     if (srcCount < 0) {
         return CX_ERR_SRC_SHORTAGE;
@@ -310,7 +310,7 @@ s32 CXSecureUncompressHuffman(const void* srcp, u32 srcSize, void* destp) {
             u32 node = *treep;
 
             node <<= treeShift;
-            treep = (const u8*)((((u32)treep >> 1) << 1) + (((*treep & 0x3F) + 1) << 1) + treeShift);
+            treep = (const u8*)((((uintptr_t)treep >> 1) << 1) + (((*treep & 0x3F) + 1) << 1) + treeShift);
 
             if (node & 0x80) {
                 destTmp >>= dataBit;
@@ -470,20 +470,20 @@ BOOL CXiLHVerifyTable(const void* pTable, u8 bit) {
 
     for (idx = 1, treep = treeStartp; treep < treeEndp; idx++, treep++) {
         u32 offset;
-        u32 nodep;
+        uintptr_t nodep;
 
         if (end_flags[idx / 8] & (1 << (idx % 8))) {
             continue;
         }
 
         offset = ((*treep & ofs_mask) + 1) << 1;
-        nodep = ((u32)treep & ~3) + offset * 2;
+        nodep = ((uintptr_t)treep & ~3) + offset * 2;
 
         if (*treep == 0 && idx >= treeSize - 4) {
             continue;
         }
 
-        if (nodep >= (u32)treeEndp) {
+        if (nodep >= (uintptr_t)treeEndp) {
             return FALSE;
         }
 
@@ -572,7 +572,7 @@ s32 CXSecureUncompressLH(const void* srcp, u32 srcSize, u8* destp, void* work) {
         }
     }
 
-    pSrc += CXiHuffImportTree(huffTable9, pSrc, LENGTH_BITS, srcSize - ((u32)pSrc - (u32)srcp));
+    pSrc += CXiHuffImportTree(huffTable9, pSrc, LENGTH_BITS, srcSize - (u32)((uintptr_t)pSrc - (uintptr_t)srcp));
 
     if (pSrc > (const u8*)srcp + srcSize) {
         return CX_ERR_SRC_SHORTAGE;
@@ -582,7 +582,7 @@ s32 CXSecureUncompressLH(const void* srcp, u32 srcSize, u8* destp, void* work) {
         return CX_ERR_ILLEGAL_TABLE;
     }
 
-    pSrc += CXiHuffImportTree(huffTable12, pSrc, OFFSET_BITS, srcSize - ((u32)pSrc - (u32)srcp));
+    pSrc += CXiHuffImportTree(huffTable12, pSrc, OFFSET_BITS, srcSize - (u32)((uintptr_t)pSrc - (uintptr_t)srcp));
 
     if (pSrc > (const u8*)srcp + srcSize) {
         return CX_ERR_SRC_SHORTAGE;
@@ -592,7 +592,7 @@ s32 CXSecureUncompressLH(const void* srcp, u32 srcSize, u8* destp, void* work) {
         return CX_ERR_ILLEGAL_TABLE;
     }
 
-    BitReader_Init(&stream, pSrc, srcSize - ((u32)pSrc - (u32)srcp));
+    BitReader_Init(&stream, pSrc, srcSize - (u32)((uintptr_t)pSrc - (uintptr_t)srcp));
 
     while (destCnt < destSize) {
         nodep = huffTable9 + 1;
@@ -606,11 +606,11 @@ s32 CXSecureUncompressLH(const void* srcp, u32 srcSize, u8* destp, void* work) {
             }
 
             if (*nodep & (0x100 >> bit)) {
-                nodep = (u16*)((u32)nodep & ~3);
+                nodep = (u16*)((uintptr_t)nodep & ~3);
                 val = nodep[offset];
                 break;
             } else {
-                nodep = (u16*)((u32)nodep & ~3);
+                nodep = (u16*)((uintptr_t)nodep & ~3);
                 nodep += offset;
             }
         }
@@ -633,11 +633,11 @@ s32 CXSecureUncompressLH(const void* srcp, u32 srcSize, u8* destp, void* work) {
                 }
 
                 if (*nodep & (0x10 >> bit)) {
-                    nodep = (u16*)((u32)nodep & ~3);
+                    nodep = (u16*)((uintptr_t)nodep & ~3);
                     offset_bit = nodep[nodeOffset];
                     break;
                 } else {
-                    nodep = (u16*)((u32)nodep & ~3);
+                    nodep = (u16*)((uintptr_t)nodep & ~3);
                     nodep += nodeOffset;
                 }
             }
@@ -692,7 +692,7 @@ static inline void RCInitInfo_(RCCompressionInfo* info, u8 bitSize, void* work) 
 
     info->bitSize = bitSize;
     info->freq = (u32*)work;
-    info->low_cnt = (u32*)((u32)work + tableMax * sizeof(u32));
+    info->low_cnt = (u32*)((uintptr_t)work + tableMax * sizeof(u32));
 
     for (i = 0; i < tableMax; i++) {
         info->freq[i] = 1;
@@ -819,7 +819,7 @@ s32 CXSecureUncompressLRC(const void* srcp, u32 srcSize, u8* destp, void* work) 
         }
     }
 
-    if (srcSize - ((u32)pSrc - (u32)srcp) < 4) {
+    if (srcSize - (u32)((uintptr_t)pSrc - (uintptr_t)srcp) < 4) {
         return CX_ERR_SRC_SHORTAGE;
     }
 
@@ -849,7 +849,7 @@ s32 CXSecureUncompressLRC(const void* srcp, u32 srcSize, u8* destp, void* work) 
                 return CX_ERR_DEST_OVERRUN;
             }
 
-            if ((u32)pSrc - (u32)srcp > srcSize) {
+            if ((uintptr_t)pSrc - (uintptr_t)srcp > srcSize) {
                 return CX_ERR_SRC_SHORTAGE;
             }
 

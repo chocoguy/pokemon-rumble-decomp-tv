@@ -49,7 +49,7 @@ void SoundThread::Shutdown() {
     }
 
     OSJamMessage(&GetInstance().mMsgQueue,
-                 reinterpret_cast<OSMessage>(MSG_SHUTDOWN), OS_MESSAGE_BLOCK);
+                 reinterpret_cast<OSMessage>(static_cast<uintptr_t>(MSG_SHUTDOWN)), OS_MESSAGE_BLOCK);
 
     OSJoinThread(&mThread, nullptr);
     mCreateFlag = false;
@@ -61,7 +61,7 @@ void SoundThread::AxCallbackFunc() {
 
 void SoundThread::AxCallbackProc() {
     if (!mPauseFlag) {
-        OSSendMessage(&mMsgQueue, reinterpret_cast<OSMessage>(MSG_AX_CALLBACK), 0);
+        OSSendMessage(&mMsgQueue, reinterpret_cast<OSMessage>(static_cast<uintptr_t>(MSG_AX_CALLBACK)), 0);
     }
 
     NW4R_UT_LINKLIST_FOREACH_SAFE (it, mPlayerCallbackList,
@@ -99,10 +99,10 @@ void SoundThread::SoundThreadProc() {
     while (true) {
         OSReceiveMessage(&mMsgQueue, &msg, OS_MESSAGE_BLOCK);
 
-        if (reinterpret_cast<u32>(msg) == MSG_AX_CALLBACK) {
+        if (reinterpret_cast<uintptr_t>(msg) == MSG_AX_CALLBACK) {
             FrameProcess();
 
-        } else if (reinterpret_cast<u32>(msg) == MSG_SHUTDOWN) {
+        } else if (reinterpret_cast<uintptr_t>(msg) == MSG_SHUTDOWN) {
             NW4R_UT_LINKLIST_FOREACH_SAFE (it, mPlayerCallbackList,
                                            { it->OnShutdownSoundThread(); })
 

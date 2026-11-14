@@ -38,7 +38,7 @@ template <typename T> inline T& move(T& x) {
     return x;
 }
 
-#if defined(GAME_DLGPIISELECTOR_EMISSION_LAYOUT)
+#if defined(GAME_DLGPIISELECTOR_EMISSION_LAYOUT) && !defined(PORT)
 template <typename InputIterator, typename OutputIterator>
 OutputIterator __move_backward(InputIterator first, InputIterator last, OutputIterator result);
 #else

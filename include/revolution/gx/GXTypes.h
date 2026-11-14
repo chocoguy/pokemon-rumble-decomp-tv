@@ -10,7 +10,12 @@ extern "C" {
 #endif
 
 #define PHY_ADDR_MASK ~((~0x3FFF) << 16)
+#if defined(PORT)
+/* A physical address is the offset in the game address window (port_addr.h). */
+#define GX_PHY_ADDR(a) PortPhys((const void*)(a))
+#else
 #define GX_PHY_ADDR(a) ((u32)a & PHY_ADDR_MASK)
+#endif
 
 typedef struct _GXData {
     u16 vNumNot;

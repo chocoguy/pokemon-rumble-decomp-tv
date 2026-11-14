@@ -1,3 +1,6 @@
+#if defined(PORT)
+#include <ctype.h>
+#else
 #ifndef MSL_C_CTYPE_H
 #define MSL_C_CTYPE_H
 
@@ -35,4 +38,5 @@ inline int toupper(int c) {
 }
 #endif
 
+#endif
 #endif

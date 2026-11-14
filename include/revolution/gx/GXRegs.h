@@ -24,7 +24,9 @@ extern "C" {
 #include "revolution/gx/shortcut_su_reg.h"
 #include "revolution/gx/shortcut_tev_reg.h"
 
-#ifdef __MWERKS__
+#if defined(PORT)
+#include <port_gx_pipe.h>
+#elif defined(__MWERKS__)
 extern volatile PPCWGPipe gxfifo : 0xCC008000;
 #else
 extern volatile PPCWGPipe gxfifo;
@@ -39,6 +41,13 @@ extern volatile void* __memReg;
 
 
 
+#if defined(PORT)
+#define GX_WRITE_U8(ub) PORTGXWrite_u8((u8)(ub))
+#define GX_WRITE_U16(us) PORTGXWrite_u16((u16)(us))
+#define GX_WRITE_S16(us) PORTGXWrite_u16((u16)(us))
+#define GX_WRITE_U32(ui) PORTGXWrite_u32((u32)(ui))
+#define GX_WRITE_F32(f) PORTGXWrite_f32((f32)(f));
+#else
 #define GX_WRITE_U8(ub) gxfifo.u8 = (u8)(ub)
 
 #define GX_WRITE_U16(us) gxfifo.u16 = (u16)(us)
@@ -48,6 +57,7 @@ extern volatile void* __memReg;
 #define GX_WRITE_U32(ui) gxfifo.u32 = (u32)(ui)
 
 #define GX_WRITE_F32(f) gxfifo.f32 = (f32)(f);
+#endif
 
 #define GX_PI_REG_WRITE_U32(a, d) *(vu32*)((vu8*)__piReg + (a)) = (u32)(d)
 
@@ -116,9 +126,9 @@ extern volatile void* __memReg;
         GX_WRITE_U32((reg));                                                                                                                         \
     }
 
-#ifdef __MWERKS__
+#if defined(__MWERKS__) || defined(PORT)
 #define GX_DEFINE_GX_READ_COUNTER(unit)                                                                                                              \
-    inline u32 __GXRead##unit##CounterU32(u32 regAddrL, u32 regAddrH) {                                                                              \
+    static inline u32 __GXRead##unit##CounterU32(u32 regAddrL, u32 regAddrH) {                                                                              \
         u32 ctrH0, ctrH1, ctrL;                                                                                                                      \
         ctrH0 = GX_##unit##_REG_READ_U16(regAddrH);                                                                                                  \
         do {                                                                                                                                         \
@@ -136,7 +146,7 @@ GX_DEFINE_GX_READ_COUNTER(CP)
 GX_DEFINE_GX_READ_COUNTER(PE)
 GX_DEFINE_GX_READ_COUNTER(MEM)
 
-#ifdef __MWERKS__
+#if defined(__MWERKS__) || defined(PORT)
 #define GX_CP_COUNTER_READ_U32(name) __GXReadCPCounterU32(name##L, name##H)
 
 #define GX_PE_COUNTER_READ_U32(name) __GXReadPECounterU32(name##L_ID, name##H_ID)

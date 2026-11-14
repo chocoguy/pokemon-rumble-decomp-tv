@@ -181,7 +181,7 @@ int method_getPiiProp(NPpu::CEngine* pBaseEngine) {
     CPpuEngine* pEngine = static_cast<CPpuEngine*>(pBaseEngine);
     std::tr1::shared_ptr<CPiiPersonalData> data = pEngine->PopPersonalData();
     if (data) {
-        pEngine->PushInt(reinterpret_cast<int>(data->GetSpeciesData()));
+        pEngine->PushInt(static_cast<int>(PortAddr(data->GetSpeciesData())));
     } else {
         pEngine->PushInt(0);
     }

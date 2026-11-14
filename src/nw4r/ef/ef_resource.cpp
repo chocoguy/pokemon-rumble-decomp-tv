@@ -410,7 +410,7 @@ u32 Resource::relocateCurveTexture(u8* pCmdList,
         int size = *reinterpret_cast<u16*>(pName);
         pName += sizeof(u16);
 
-        pNameTable->datas[i].work = reinterpret_cast<u32>(
+        pNameTable->datas[i].work = PortAddr(
             _FindTexture(reinterpret_cast<const char*>(pName), NULL));
 
         if (pName[0] != 0 && pNameTable->datas[i].work == 0) {
@@ -456,7 +456,7 @@ u32 Resource::relocateCurveChild(u8* pCmdList,
         int size = *reinterpret_cast<u16*>(pName);
         pName += sizeof(u16);
 
-        pNameTable->datas[i].work = reinterpret_cast<u32>(
+        pNameTable->datas[i].work = PortAddr(
             _FindEmitter(reinterpret_cast<char*>(pName), NULL));
 
         if (pNameTable->datas[i].work == 0) {
@@ -482,7 +482,11 @@ u32 Resource::RelocateCommand() {
 
         ParticleParameterDesc* pPtclDesc =
             pResource->GetParticleParameterDesc();
+#if defined(PORT)
+        Ptr32<TextureData>* ppWork = pPtclDesc->mTexture;
+#else
         TextureData** ppWork = pPtclDesc->mTexture;
+#endif
         u8* pPtr = pPtclDesc->textureNames;
 
         for (int i = 0; i < TEX_LAYER_MAX; i++) {

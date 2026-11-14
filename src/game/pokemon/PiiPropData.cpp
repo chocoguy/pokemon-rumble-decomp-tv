@@ -305,17 +305,21 @@ void PiiPropData::SetWazaLevels(u16 monsno, u8 form, int formScope, const std::v
 #pragma section code_type ".text.piiprop_tail"
 inline PiiPropData::SpeciesMoves::SpeciesMoves() {}
 namespace std {
+#if !defined(PORT) /* CodeWarrior-only specialization */
 template <> __declspec(section ".text.piiprop_species_begin") inline vector<PiiPropData::SpeciesMoves::LevelMove>::~vector() {}
 template <> __declspec(section ".text.piiprop_species_end") inline vector<s16>::~vector() {}
+#endif
 }
 inline PiiPropData::SpeciesMoves::~SpeciesMoves() {}
 namespace std {
+#if !defined(PORT) /* CodeWarrior-only specialization */
 template <> __declspec(section ".text.piiprop_push") void vector<PiiPropData::SpeciesMoves::LevelMove>::push_back(const PiiPropData::SpeciesMoves::LevelMove& x) {
     base::push_back(x);
 }
 template <> __declspec(section ".text.piiprop_push") void vector<s16>::push_back(const s16& x) {
     base::push_back(x);
 }
+#endif
 }
 #pragma dont_inline reset
 

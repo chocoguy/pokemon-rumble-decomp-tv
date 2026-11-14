@@ -16,6 +16,14 @@ void* memchr(const void*, int, size_t);
 size_t wcstombs(char*, const wchar_t*, size_t);
 size_t mbstowcs(wchar_t*, const char*, size_t);
 int mbtowc(wchar_t*, const char*, size_t);
+#if defined(PORT)
+/* The host's math.h and ctype.h, and MSL's wctype.h, already define these. */
+#include <ctype.h>
+#include <wctype.h>
+static inline int iswupper(wint_t c) {
+    return c < 0 || c >= 256 ? 0 : _current_locale.ctype_cmpt_ptr->wctype_map_ptr[c] & 512;
+}
+#else
 static inline long double fabsl(long double x) {
     return __fabs((double)x);
 }
@@ -37,7 +45,18 @@ static inline int iswdigit(wint_t c) {
     return c >= 256 ? 0 : _current_locale.ctype_cmpt_ptr->wctype_map_ptr[c] & 8;
 }
 extern wint_t towupper(wint_t);
+#endif
 
+#if defined(PORT)
+/* The Wii's long, size_t and ptrdiff_t were 32 bits, and game code passes 32-bit values
+ * with %l, %z and %t. On arm64 each variadic argument fills an 8-byte slot with the value
+ * in its low half, so reading 32 bits is right whether the caller passed an int or a long. */
+#define PORT_VA_ARG_LONG(ap) ((long)va_arg(ap, int))
+#define PORT_VA_ARG_ULONG(ap) ((unsigned long)va_arg(ap, unsigned int))
+#else
+#define PORT_VA_ARG_LONG(ap) va_arg(ap, long)
+#define PORT_VA_ARG_ULONG(ap) va_arg(ap, unsigned long)
+#endif
 #pragma exceptions on
 
 #define LDBL_MANT_DIG 53
@@ -50,7 +69,9 @@ extern wint_t towupper(wint_t);
 #define TARGET_FLOAT_MANT_BITS (TARGET_FLOAT_MANT_DIG - TARGET_FLOAT_IMPLICIT_J_BIT)
 #define TARGET_FLOAT_EXP_BITS (TARGET_FLOAT_BITS - TARGET_FLOAT_MANT_BITS - 1)
 
+#if !defined(PORT) /* the host's stdint.h has it (also 64-bit) */
 typedef long long intmax_t;
+#endif
 
 #define PTRDIFF __typeof__((char*)0 - (char*)0)
 
@@ -1084,15 +1105,15 @@ int __wpformatter(void* (*WriteProc)(void*, const wchar_t*, size_t), void* Write
             case L'd':
             case L'i':
                 if (positional_format->argument_options == long_argument) {
-                    positional_format->argument.signed_word = va_arg(arg, long);
+                    positional_format->argument.signed_word = PORT_VA_ARG_LONG(arg);
                 } else if (positional_format->argument_options == long_long_argument) {
                     positional_format->argument.signed_doubleword = va_arg(arg, long long);
                 } else if (positional_format->argument_options == intmax_argument) {
                     positional_format->argument.signed_doubleword = va_arg(arg, intmax_t);
                 } else if (positional_format->argument_options == size_t_argument) {
-                    positional_format->argument.signed_word = va_arg(arg, size_t);
+                    positional_format->argument.signed_word = PORT_VA_ARG_ULONG(arg);
                 } else if (positional_format->argument_options == ptrdiff_argument) {
-                    positional_format->argument.signed_word = va_arg(arg, ptrdiff_t);
+                    positional_format->argument.signed_word = PORT_VA_ARG_LONG(arg);
                 } else {
                     positional_format->argument.signed_word = va_arg(arg, int);
                 }
@@ -1102,15 +1123,15 @@ int __wpformatter(void* (*WriteProc)(void*, const wchar_t*, size_t), void* Write
             case L'x':
             case L'X':
                 if (positional_format->argument_options == long_argument) {
-                    positional_format->argument.unsigned_word = va_arg(arg, unsigned long);
+                    positional_format->argument.unsigned_word = PORT_VA_ARG_ULONG(arg);
                 } else if (positional_format->argument_options == long_long_argument) {
                     positional_format->argument.unsigned_doubleword = va_arg(arg, unsigned long long);
                 } else if (positional_format->argument_options == intmax_argument) {
                     positional_format->argument.unsigned_doubleword = va_arg(arg, intmax_t);
                 } else if (positional_format->argument_options == size_t_argument) {
-                    positional_format->argument.unsigned_word = va_arg(arg, size_t);
+                    positional_format->argument.unsigned_word = PORT_VA_ARG_ULONG(arg);
                 } else if (positional_format->argument_options == ptrdiff_argument) {
-                    positional_format->argument.unsigned_word = va_arg(arg, ptrdiff_t);
+                    positional_format->argument.unsigned_word = PORT_VA_ARG_LONG(arg);
                 } else {
                     positional_format->argument.unsigned_word = va_arg(arg, unsigned int);
                 }
@@ -1203,15 +1224,15 @@ int __wpformatter(void* (*WriteProc)(void*, const wchar_t*, size_t), void* Write
                 long_long_num = format.argument.signed_doubleword;
             } else {
                 if (format.argument_options == long_argument) {
-                    long_num = va_arg(arg, long);
+                    long_num = PORT_VA_ARG_LONG(arg);
                 } else if (format.argument_options == long_long_argument) {
                     long_long_num = va_arg(arg, long long);
                 } else if (format.argument_options == intmax_argument) {
                     long_long_num = va_arg(arg, intmax_t);
                 } else if (format.argument_options == size_t_argument) {
-                    long_num = va_arg(arg, size_t);
+                    long_num = PORT_VA_ARG_ULONG(arg);
                 } else if (format.argument_options == ptrdiff_argument) {
-                    long_num = va_arg(arg, ptrdiff_t);
+                    long_num = PORT_VA_ARG_LONG(arg);
                 } else {
                     long_num = va_arg(arg, int);
                 }
@@ -1243,15 +1264,15 @@ int __wpformatter(void* (*WriteProc)(void*, const wchar_t*, size_t), void* Write
                 long_long_num = format.argument.signed_doubleword;
             } else {
                 if (format.argument_options == long_argument) {
-                    long_num = va_arg(arg, unsigned long);
+                    long_num = PORT_VA_ARG_ULONG(arg);
                 } else if (format.argument_options == long_long_argument) {
                     long_long_num = va_arg(arg, long long);
                 } else if (format.argument_options == intmax_argument) {
                     long_long_num = va_arg(arg, intmax_t);
                 } else if (format.argument_options == size_t_argument) {
-                    long_num = va_arg(arg, size_t);
+                    long_num = PORT_VA_ARG_ULONG(arg);
                 } else if (format.argument_options == ptrdiff_argument) {
-                    long_num = va_arg(arg, ptrdiff_t);
+                    long_num = PORT_VA_ARG_LONG(arg);
                 } else {
                     long_num = va_arg(arg, unsigned int);
                 }
@@ -1386,7 +1407,7 @@ int __wpformatter(void* (*WriteProc)(void*, const wchar_t*, size_t), void* Write
             if (max_argument > 0) {
                 num_chars = __wprintf_custom_format(format.range_begin, format.range_end, format.argument.unsigned_word, buff, 509);
             } else {
-                num_chars = __wprintf_custom_format(format.range_begin, format.range_end, va_arg(arg, unsigned long), buff, 509);
+                num_chars = __wprintf_custom_format(format.range_begin, format.range_end, PORT_VA_ARG_ULONG(arg), buff, 509);
             }
             buff_ptr = buff;
             break;
@@ -1511,7 +1532,7 @@ void* __wStringWrite(void* wosc, const wchar_t* buffer, size_t numchars) {
 }
 
 static void* __wCountWrite(void* pContext, const wchar_t* pBuffer, size_t count) {
-    return (void*)1;
+    return (void*)(uintptr_t)1; // any non-null value
 }
 
 int swprintf(wchar_t* s, size_t n, const wchar_t* format, ...) {

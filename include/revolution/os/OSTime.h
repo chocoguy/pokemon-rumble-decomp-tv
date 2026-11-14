@@ -30,7 +30,9 @@ OSTime __OSTimeToSystemTime(OSTime);
 void OSTicksToCalendarTime(OSTime, OSCalendarTime*);
 OSTime OSCalendarTimeToTicks(const OSCalendarTime*);
 
-#ifdef __MWERKS__
+#if defined(PORT)
+#define OS_BUS_CLOCK_SPEED 243000000u /* a low-memory global on the console */
+#elif defined(__MWERKS__)
 vu32 OS_BUS_CLOCK_SPEED : 0x800000F8;
 #else
 vu32 OS_BUS_CLOCK_SPEED;

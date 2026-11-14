@@ -37,7 +37,11 @@ struct OSAlarm {
     void* userData;
 };
 
+#if defined(PORT)
+#define OS_BUS_CLOCK 243000000u /* the Wii's bus clock; a low-memory global on the console */
+#else
 #define OS_BUS_CLOCK (*(u32*)0x800000F8)
+#endif
 #define OS_TIMER_CLOCK (OS_BUS_CLOCK / 4)
 
 #define OSTicksToSeconds(ticks) ((ticks) / OS_TIMER_CLOCK)

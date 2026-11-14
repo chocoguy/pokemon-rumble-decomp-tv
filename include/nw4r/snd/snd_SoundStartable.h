@@ -87,9 +87,11 @@ public:
     bool StartSound(SoundHandle* pHandle, const char* pLabel) {
         return detail_StartSound(pHandle, pLabel, nullptr) == START_SUCCESS;
     }
+#if !defined(PORT) /* same type as u32 on the port */
     bool StartSound(SoundHandle* pHandle, unsigned int id) {
         return detail_StartSound(pHandle, id, nullptr) == START_SUCCESS;
     }
+#endif
     bool StartSound(SoundHandle* pHandle, int id) {
         return detail_StartSound(pHandle, id, nullptr) == START_SUCCESS;
     }
@@ -100,9 +102,11 @@ public:
     bool HoldSound(SoundHandle* pHandle, const char* pLabel) {
         return detail_HoldSound(pHandle, pLabel, nullptr) == START_SUCCESS;
     }
+#if !defined(PORT) /* same type as u32 on the port */
     bool HoldSound(SoundHandle* pHandle, unsigned int id) {
         return detail_HoldSound(pHandle, id, nullptr) == START_SUCCESS;
     }
+#endif
     bool HoldSound(SoundHandle* pHandle, int id) {
         return detail_HoldSound(pHandle, id, nullptr) == START_SUCCESS;
     }
@@ -110,9 +114,11 @@ public:
     bool PrepareSound(SoundHandle* pHandle, u32 id) {
         return detail_PrepareSound(pHandle, id, nullptr) == START_SUCCESS;
     }
+#if !defined(PORT) /* same type as u32 on the port */
     bool PrepareSound(SoundHandle* pHandle, unsigned int id) {
         return detail_PrepareSound(pHandle, id, nullptr) == START_SUCCESS;
     }
+#endif
     bool PrepareSound(SoundHandle* pHandle, int id) {
         return detail_PrepareSound(pHandle, id, nullptr) == START_SUCCESS;
     }

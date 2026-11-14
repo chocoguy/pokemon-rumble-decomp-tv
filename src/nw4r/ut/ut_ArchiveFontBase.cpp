@@ -224,7 +224,7 @@ ArchiveFontBase::ConstructOpAnalyzeGLGR(ConstructContext* pContext,
     const u32 sizeAdjustTable = (RoundUp)(numSheet * sizeof(u16), 4);
 
     const u32 remain = pContext->GetRemain();
-    u16* pAdjustTable = reinterpret_cast<u16*>((RoundDown)(reinterpret_cast<u32>(pFileTop) + remain - sizeAdjustTable, 2));
+    u16* pAdjustTable = reinterpret_cast<u16*>((RoundDown)(reinterpret_cast<uintptr_t>(pFileTop) + remain - sizeAdjustTable, 2));
 
     if (remain < (pBlockEnd - pFileTop) + sizeAdjustTable) {
         return CONSTRUCT_ERROR;
@@ -368,7 +368,7 @@ ArchiveFontBase::ConstructOpAnalyzeTGLP(ConstructContext* pContext,
     pContext->pFINF->pGlyph->sheetNum = numSheet;
 
     u32 sheetOffset =
-        reinterpret_cast<u32>(pContext->pFINF->pGlyph->sheetImage);
+        pContext->pFINF->pGlyph->sheetImage.Raw();
 
     pContext->Align(32);
     pContext->pFINF->pGlyph->sheetImage = pContext->pCurrent;

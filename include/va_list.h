@@ -1,3 +1,6 @@
+#if defined(PORT)
+#include <stdarg.h>
+#else
 #ifndef VA_LIST_H
 #define VA_LIST_H
 
@@ -19,4 +22,5 @@ typedef __va_list va_list;
 }
 #endif
 
+#endif
 #endif

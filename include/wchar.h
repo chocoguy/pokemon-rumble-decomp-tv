@@ -1,3 +1,4 @@
+/* MSL's wide-character functions. The port compiles MSL's own versions (src/MSL_C), because the host's assume a 4-byte wchar_t; see compile_check.py's msl group. */
 #ifndef MSL_WCHAR_H
 #define MSL_WCHAR_H
 

@@ -29,9 +29,11 @@ extern "C" s32 FAFclose(FAFile* pFile);
 extern "C" s32 FARemove(const char* pPath);
 extern "C" const char* OSGetAppGamename();
 
+#if !defined(PORT) /* MSL's own locale tables; the host's isupper on the port */
 inline int isupper(int c) {
     return (c < 0 || c >= 256) ? 0 : _current_locale.ctype_cmpt_ptr->ctype_map_ptr[c] & 0x200;
 }
+#endif
 
 std::wstring FormatPhotoMessage(const wchar_t* pFormat, const wchar_t* pDirectory, const wchar_t* pFileName);
 
@@ -57,7 +59,7 @@ void* QueryPhotoDevice(void* pArgument) {
     CPhotoDeviceQuery* pQuery = static_cast<CPhotoDeviceQuery*>(pArgument);
     pQuery->mResult = FASetupFSI(pQuery->mDrive, 6);
     pQuery->mResult = FAGetdev(pQuery->mDrive, &pQuery->mInfo);
-    return reinterpret_cast<void*>(pQuery->mResult);
+    return reinterpret_cast<void*>(static_cast<intptr_t>(pQuery->mResult)); // a thread's result code
 }
 
 

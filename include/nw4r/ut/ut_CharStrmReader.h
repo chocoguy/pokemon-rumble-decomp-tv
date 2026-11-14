@@ -41,7 +41,7 @@ private:
     }
 
     template <typename T> void StepStrm(int offset) {
-        static_cast<const T*>(mCharStrm) += offset;
+        mCharStrm = static_cast<const T*>(mCharStrm) + offset;
     }
 
 private:

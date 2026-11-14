@@ -877,9 +877,9 @@ public:
     typedef typename base::size_type size_type;
     typedef typename base::iterator iterator;
     typedef typename base::const_iterator const_iterator;
-    using base::node;
-    using base::NodeAllocator;
-    using base::node_allocator;
+    typedef typename base::node node;
+    typedef typename base::NodeAllocator NodeAllocator;
+    typedef typename base::node_allocator node_allocator;
     using base::do_lower_bound;
     using base::comp;
     using base::end_node;

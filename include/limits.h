@@ -1,3 +1,8 @@
+#if defined(PORT)
+/* The port uses the system C library; see port/include/port_libc.h for the additions. */
+#include_next <limits.h>
+#include <port_libc.h>
+#else
 #ifndef MSL_LIMITS_H
 #define MSL_LIMITS_H
 
@@ -17,4 +22,5 @@
 #define LONG_MAX 2147483647L
 #define ULONG_MAX 4294967295UL
 
+#endif
 #endif

@@ -22,7 +22,11 @@
 #include <string>
 #include <vector>
 
+#if defined(PORT)
+namespace InfoMath { using ::ceil; }
+#else
 namespace InfoMath { extern "C" __attribute__((nothrow)) double ceil(double); }
+#endif
 
 #pragma pool_data off
 

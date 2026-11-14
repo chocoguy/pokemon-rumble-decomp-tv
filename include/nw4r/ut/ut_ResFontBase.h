@@ -25,13 +25,21 @@ struct FontTextureGlyph {
     u16 sheetLine;
     u16 sheetWidth;
     u16 sheetHeight;
+#if defined(PORT)
+    Ptr32<u8> sheetImage; /* 4-byte slot in the file */
+#else
     u8* sheetImage;
+#endif
 };
 
 struct FontWidth {
     u16 indexBegin;
     u16 indexEnd;
+#if defined(PORT)
+    Ptr32<FontWidth> pNext; /* 4-byte slot in the file */
+#else
     FontWidth* pNext;
+#endif
     CharWidths widthTable[];
 };
 
@@ -40,7 +48,11 @@ struct FontCodeMap {
     u16 ccodeEnd;
     u16 mappingMethod;
     u16 reserved;
+#if defined(PORT)
+    Ptr32<FontCodeMap> pNext; /* 4-byte slot in the file */
+#else
     FontCodeMap* pNext;
+#endif
     u16 mapInfo[];
 };
 
@@ -50,9 +62,21 @@ struct FontInformation {
     u16 alterCharIndex;
     CharWidths defaultWidth;
     u8 encoding;
+#if defined(PORT)
+    Ptr32<FontTextureGlyph> pGlyph; /* 4-byte slot in the file */
+#else
     FontTextureGlyph* pGlyph;
+#endif
+#if defined(PORT)
+    Ptr32<FontWidth> pWidth; /* 4-byte slot in the file */
+#else
     FontWidth* pWidth;
+#endif
+#if defined(PORT)
+    Ptr32<FontCodeMap> pMap; /* 4-byte slot in the file */
+#else
     FontCodeMap* pMap;
+#endif
     u8 height;
     u8 width;
     u8 ascent;

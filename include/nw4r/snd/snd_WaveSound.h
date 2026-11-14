@@ -41,7 +41,7 @@ namespace nw4r { namespace snd { namespace detail
 		bool Prepare(void const *waveSoundBase, s32 waveSoundOffset,
 		             WsdPlayer::StartOffsetType startOffsetType, s32 offset,
 		             WsdPlayer::WsdCallback const *callback,
-		             u32 callbackData);
+		             uintptr_t callbackData);
 
 		void SetChannelPriority(int priority);
 		void SetReleasePriorityFix(bool flag);

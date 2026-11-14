@@ -284,15 +284,15 @@ bool AxManager::AppendEffect(AuxBus bus, FxBase* pFx) {
         switch (bus) {
         case AUX_A:
             AXRegisterAuxACallback(AuxCallbackFunc,
-                                   reinterpret_cast<void*>(bus));
+                                   reinterpret_cast<void*>(static_cast<uintptr_t>(bus)));
             break;
         case AUX_B:
             AXRegisterAuxBCallback(AuxCallbackFunc,
-                                   reinterpret_cast<void*>(bus));
+                                   reinterpret_cast<void*>(static_cast<uintptr_t>(bus)));
             break;
         case AUX_C:
             AXRegisterAuxCCallback(AuxCallbackFunc,
-                                   reinterpret_cast<void*>(bus));
+                                   reinterpret_cast<void*>(static_cast<uintptr_t>(bus)));
             break;
         }
 
@@ -359,7 +359,7 @@ void AxManager::AuxCallbackFunc(void* pChans, void* pContext) {
     void* buffer[AX_DPL2_MAX];
 
     void** ppChans = static_cast<void**>(pChans);
-    AuxBus bus = static_cast<AuxBus>(reinterpret_cast<u32>(pContext));
+    AuxBus bus = static_cast<AuxBus>(reinterpret_cast<uintptr_t>(pContext));
 
     u32 tick = OSGetTick();
 

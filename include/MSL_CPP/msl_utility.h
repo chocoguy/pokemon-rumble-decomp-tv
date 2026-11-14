@@ -128,7 +128,9 @@ template <class T> struct is_pointer_imp { enum { value = false }; };
 template <class T> struct is_pointer_imp<T*> { enum { value = true }; };
 template <class T> struct is_member_pointer_imp { enum { value = false }; };
 template <class T, class U> struct is_member_pointer_imp<U T::*> { enum { value = true }; };
-#if defined(__MWERKS__) && __MWERKS__ >= 0x2500
+#if defined(PORT)
+template <class T> struct is_enum_imp { enum { value = __is_enum(T) }; };
+#elif defined(__MWERKS__) && __MWERKS__ >= 0x2500
 template <class T> struct is_enum_imp { enum { value = (__builtin_type(T) & 0xff00) == 0x0400 }; };
 #else
 template <class T> struct is_enum_imp { enum { value = false }; };

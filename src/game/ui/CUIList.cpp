@@ -24,7 +24,7 @@ void CUIList::Load(const char* const* pArchives, const char* pName, const std::t
     itemName += "_item";
     std::vector<std::tr1::shared_ptr<CLayout> > layouts;
     for (;;) {
-        nw4r::lyt::Pane* pPane = GetLayout()->FindPane(FormatString("ITEM%d", layouts.size()).c_str());
+        nw4r::lyt::Pane* pPane = GetLayout()->FindPane(FormatString("ITEM%d", static_cast<int>(layouts.size())).c_str());
         if (pPane == nullptr) break;
         std::tr1::shared_ptr<CLayout> layout(new CLayout());
         layout->Load(pArchives,itemName.c_str(),rFonts,background);

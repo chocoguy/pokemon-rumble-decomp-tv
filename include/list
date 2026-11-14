@@ -394,7 +394,7 @@ public:
 
     void pop_front() {
         node_base* pNode = this->begin_node();
-        unlink_nodes(pNode, pNode);
+        this->unlink_nodes(pNode, pNode);
         static_cast<node*>(pNode)->data_.~T();
         this->tail_.first().deallocate(static_cast<node*>(pNode), 1);
         --this->size_.second();
@@ -491,7 +491,7 @@ typename list<T, Allocator>::iterator list<T, Allocator>::erase(iterator positio
     iterator next(position);
     ++next;
     node* pNode = static_cast<node*>(position.base());
-    unlink_nodes(pNode, pNode);
+    this->unlink_nodes(pNode, pNode);
     pNode->data_.~T();
     this->tail_.first().deallocate(pNode, 1);
     --this->size_.second();

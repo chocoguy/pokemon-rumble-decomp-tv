@@ -1,7 +1,7 @@
 #ifndef GXFDLSHORTCUT_h
 #define GXFDLSHORTCUT_H
 
-#if __MWERKS__
+#if defined(__MWERKS__) || defined(PORT)
 #define FAST_GPFLAGSET(regOrg, newFlag, regName)                                                                                                     \
     do {                                                                                                                                             \
         (regOrg) =                                                                                                                                   \

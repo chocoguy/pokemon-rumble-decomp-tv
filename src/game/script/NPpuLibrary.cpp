@@ -328,19 +328,19 @@ int ScriptBinding__Sqrt(CEngine* pEngine) {
 
 int ScriptBinding_CreateTimer(CEngine* pEngine) {
     OSTime* pTimer = static_cast<OSTime*>(OSAlloc(sizeof(OSTime)));
-    pEngine->PushInt(reinterpret_cast<int>(pTimer));
+    pEngine->PushInt(static_cast<int>(PortAddr(pTimer)));
     return CEngine::NATIVE_CONTINUE;
 }
 
 int ScriptBinding_ResetTimer(CEngine* pEngine) {
-    OSTime* pTimer = reinterpret_cast<OSTime*>(pEngine->PopInt());
+    OSTime* pTimer = PortPtr<OSTime*>(static_cast<u32>(pEngine->PopInt()));
     *pTimer = OSGetTime();
     pEngine->PushInt(0);
     return CEngine::NATIVE_CONTINUE;
 }
 
 int ScriptBinding_GetTime(CEngine* pEngine) {
-    OSTime* pTimer = reinterpret_cast<OSTime*>(pEngine->PopInt());
+    OSTime* pTimer = PortPtr<OSTime*>(static_cast<u32>(pEngine->PopInt()));
     OSTime elapsed = OSGetTime() - *pTimer;
     pEngine->PushInt(OSTicksToMicroseconds(elapsed));
     return CEngine::NATIVE_CONTINUE;

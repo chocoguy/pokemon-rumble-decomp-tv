@@ -58,7 +58,7 @@ void TexMap::Set(const GXTexObj &pTexObj) {
 
 void TexMap::Set(TPLPalette *pal, u32 id) {
 
-    if ((unsigned int)pal->descriptorArray < 0x80000000) {
+    if (pal->descriptorArray.Raw() < 0x80000000) { // an unresolved offset: not bound yet
         TPLBind(pal);
     }
 
@@ -94,7 +94,7 @@ void TexMap::Set(const TPLDescriptor *pTPLDesc) {
 
 void TexMap::ReplaceImage(TPLPalette *pal, u32 id) {
 
-    if ((unsigned int)pal->descriptorArray < 0x80000000) {
+    if (pal->descriptorArray.Raw() < 0x80000000) { // an unresolved offset: not bound yet
         TPLBind(pal);
     }
 

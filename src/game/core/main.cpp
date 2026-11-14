@@ -729,8 +729,8 @@ const TimeMessageIDs gMainTimeMessageIDs = {131137, 131138, 131130, 131131, 1311
 #include <revolution/fa.h>
 
 void SetTextLocale(int locale);
-void InitializeEffect(unsigned long count, unsigned short emitters, unsigned short groups, unsigned long particles,
-                      unsigned long flags);
+void InitializeEffect(u32 count, unsigned short emitters, unsigned short groups, u32 particles,
+                      u32 flags);
 void FinalizeEffect();
 
 inline CMain::CMain() {
@@ -745,7 +745,12 @@ template <>
 function<bool(HBMSelectBtnNum)>::function(bool (*f)(HBMSelectBtnNum), detail::unused_argument *);
 }
 }
+#if defined(PORT)
+// The port's main sets up the host and runs this on the game's main thread.
+extern "C" void GameMain() {
+#else
 void main() {
+#endif
     CNTInit();
     DVDInit();
     GameMemory::Initialize();

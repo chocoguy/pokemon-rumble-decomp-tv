@@ -47,12 +47,12 @@ public:
         const u32 offsetUseSheets = RoundUp(offsetSizeCMAP + GetNumCMAP() * sizeof(u32), 4);
         const u32 offsetUseCWDH = RoundUp(offsetUseSheets + mSizeSheetFlags * GetNumSet(), 4);
         const u32 offsetUseCMAP = RoundUp(offsetUseCWDH + mSizeCWDHFlags * GetNumSet(), 4);
-        mpSizeSheetsArray = reinterpret_cast<const u32*>(offsetSizeSheets + reinterpret_cast<u32>(mpFileTop));
-        mpSizeCWDHArray = reinterpret_cast<const u32*>(offsetSizeCWDH + reinterpret_cast<u32>(mpFileTop));
-        mpSizeCMAPArray = reinterpret_cast<const u32*>(offsetSizeCMAP + reinterpret_cast<u32>(mpFileTop));
-        mpUseSheetArray = reinterpret_cast<const u32*>(offsetUseSheets + reinterpret_cast<u32>(mpFileTop));
-        mpUseCWDHArray = reinterpret_cast<const u32*>(offsetUseCWDH + reinterpret_cast<u32>(mpFileTop));
-        mpUseCMAPArray = reinterpret_cast<const u32*>(offsetUseCMAP + reinterpret_cast<u32>(mpFileTop));
+        mpSizeSheetsArray = reinterpret_cast<const u32*>(offsetSizeSheets + reinterpret_cast<uintptr_t>(mpFileTop));
+        mpSizeCWDHArray = reinterpret_cast<const u32*>(offsetSizeCWDH + reinterpret_cast<uintptr_t>(mpFileTop));
+        mpSizeCMAPArray = reinterpret_cast<const u32*>(offsetSizeCMAP + reinterpret_cast<uintptr_t>(mpFileTop));
+        mpUseSheetArray = reinterpret_cast<const u32*>(offsetUseSheets + reinterpret_cast<uintptr_t>(mpFileTop));
+        mpUseCWDHArray = reinterpret_cast<const u32*>(offsetUseCWDH + reinterpret_cast<uintptr_t>(mpFileTop));
+        mpUseCMAPArray = reinterpret_cast<const u32*>(offsetUseCMAP + reinterpret_cast<uintptr_t>(mpFileTop));
     }
     explicit FontGlyphGroupsAcs(const void* pBrfna, int& numSheet) {
         mpFileTop = static_cast<const u8*>(pBrfna);
@@ -70,12 +70,12 @@ public:
         const u32 offsetUseSheets = RoundUp(offsetSizeCMAP + GetNumCMAP() * sizeof(u32), 4);
         const u32 offsetUseCWDH = RoundUp(offsetUseSheets + mSizeSheetFlags * GetNumSet(), 4);
         const u32 offsetUseCMAP = RoundUp(offsetUseCWDH + mSizeCWDHFlags * GetNumSet(), 4);
-        mpSizeSheetsArray = reinterpret_cast<const u32*>(offsetSizeSheets + reinterpret_cast<u32>(mpFileTop));
-        mpSizeCWDHArray = reinterpret_cast<const u32*>(offsetSizeCWDH + reinterpret_cast<u32>(mpFileTop));
-        mpSizeCMAPArray = reinterpret_cast<const u32*>(offsetSizeCMAP + reinterpret_cast<u32>(mpFileTop));
-        mpUseSheetArray = reinterpret_cast<const u32*>(offsetUseSheets + reinterpret_cast<u32>(mpFileTop));
-        mpUseCWDHArray = reinterpret_cast<const u32*>(offsetUseCWDH + reinterpret_cast<u32>(mpFileTop));
-        mpUseCMAPArray = reinterpret_cast<const u32*>(offsetUseCMAP + reinterpret_cast<u32>(mpFileTop));
+        mpSizeSheetsArray = reinterpret_cast<const u32*>(offsetSizeSheets + reinterpret_cast<uintptr_t>(mpFileTop));
+        mpSizeCWDHArray = reinterpret_cast<const u32*>(offsetSizeCWDH + reinterpret_cast<uintptr_t>(mpFileTop));
+        mpSizeCMAPArray = reinterpret_cast<const u32*>(offsetSizeCMAP + reinterpret_cast<uintptr_t>(mpFileTop));
+        mpUseSheetArray = reinterpret_cast<const u32*>(offsetUseSheets + reinterpret_cast<uintptr_t>(mpFileTop));
+        mpUseCWDHArray = reinterpret_cast<const u32*>(offsetUseCWDH + reinterpret_cast<uintptr_t>(mpFileTop));
+        mpUseCMAPArray = reinterpret_cast<const u32*>(offsetUseCMAP + reinterpret_cast<uintptr_t>(mpFileTop));
     }
 
     u32 GetSheetSize() const { return mpData->body.sheetSize; }

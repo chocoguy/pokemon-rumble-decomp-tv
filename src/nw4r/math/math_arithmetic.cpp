@@ -3,6 +3,7 @@
 namespace nw4r {
 namespace math {
 
+#if !defined(PORT) /* port version below */
 f32 FrSqrt(register f32 x) {
     register f32 rsqrt;
     register f32 c_half = 0.5f, c_three = 3.0f;
@@ -19,6 +20,12 @@ f32 FrSqrt(register f32 x) {
 
     return work1;
 }
+#else
+f32 FrSqrt(f32 x) {
+    // The original refines frsqrte with one Newton step.
+    return 1.0f / __builtin_sqrtf(x);
+}
+#endif
 
 u32 CntBit1(u32 x) {
     u32 n = x - ((x >> 1) & 0x55555555);

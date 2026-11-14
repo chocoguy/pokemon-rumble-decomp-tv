@@ -7,10 +7,15 @@ extern "C" {
 
 #include "revolution/base/PPCWGPipe.h"
 
-#ifdef __MWERKS__
+#if defined(PORT)
+#include <port_gx_pipe.h>
+#define __GXWRITE(td, v) PORTGXWrite_##td((td)(v))
+#elif defined(__MWERKS__)
 volatile PPCWGPipe GXWGFifo : 0xCC008000;
+#define __GXWRITE(td, v) (GXWGFifo.td = (td)(v))
 #else
 volatile PPCWGPipe GXWGFifo;
+#define __GXWRITE(td, v) (GXWGFifo.td = (td)(v))
 #endif
 
 #define __GXCDEF(prfx, n, t) __GXCDEF##n(prfx##n##t, t, t)
@@ -18,31 +23,31 @@ volatile PPCWGPipe GXWGFifo;
 
 #define __GXCDEF1(func, ts, td)                                                                                                                      \
     static void func(const ts x) {                                                                                                                   \
-        GXWGFifo.td = (td)x;                                                                                                                         \
+        __GXWRITE(td, x);                                                                                                                         \
         return;                                                                                                                                      \
     }
 
 #define __GXCDEF2(func, ts, td)                                                                                                                      \
     static void func(const ts x, const ts y) {                                                                                                       \
-        GXWGFifo.td = (td)x;                                                                                                                         \
-        GXWGFifo.td = (td)y;                                                                                                                         \
+        __GXWRITE(td, x);                                                                                                                         \
+        __GXWRITE(td, y);                                                                                                                         \
         return;                                                                                                                                      \
     }
 
 #define __GXCDEF3(func, ts, td)                                                                                                                      \
     static void func(const ts x, const ts y, const ts z) {                                                                                           \
-        GXWGFifo.td = (td)x;                                                                                                                         \
-        GXWGFifo.td = (td)y;                                                                                                                         \
-        GXWGFifo.td = (td)z;                                                                                                                         \
+        __GXWRITE(td, x);                                                                                                                         \
+        __GXWRITE(td, y);                                                                                                                         \
+        __GXWRITE(td, z);                                                                                                                         \
         return;                                                                                                                                      \
     }
 
 #define __GXCDEF4(func, ts, td)                                                                                                                      \
     static void func(const ts x, const ts y, const ts z, const ts w) {                                                                               \
-        GXWGFifo.td = (td)x;                                                                                                                         \
-        GXWGFifo.td = (td)y;                                                                                                                         \
-        GXWGFifo.td = (td)z;                                                                                                                         \
-        GXWGFifo.td = (td)w;                                                                                                                         \
+        __GXWRITE(td, x);                                                                                                                         \
+        __GXWRITE(td, y);                                                                                                                         \
+        __GXWRITE(td, z);                                                                                                                         \
+        __GXWRITE(td, w);                                                                                                                         \
         return;                                                                                                                                      \
     }
 

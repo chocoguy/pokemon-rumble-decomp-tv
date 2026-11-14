@@ -29,11 +29,11 @@ inline AnimCurveNameTable* GetPostFieldNames(AnimCurveHeader* pHeader,
                                             CurveOffset& randomSize) {
     u8* pCursor = reinterpret_cast<u8*>(pHeader);
     pCursor += pHeader->keyTable;
-    pCursor = reinterpret_cast<u8*>(reinterpret_cast<u32>(pCursor) + sizeof(AnimCurveHeader));
+    pCursor = reinterpret_cast<u8*>(reinterpret_cast<uintptr_t>(pCursor) + sizeof(AnimCurveHeader));
     rangeSize = static_cast<CurveOffset>(pHeader->rangeTable);
     pCursor += rangeSize;
     randomSize = static_cast<CurveOffset>(pHeader->randomTable);
-    return reinterpret_cast<AnimCurveNameTable*>(reinterpret_cast<u32>(pCursor) + randomSize);
+    return reinterpret_cast<AnimCurveNameTable*>(reinterpret_cast<uintptr_t>(pCursor) + randomSize);
 }
 
 inline void GetPostFieldNameSize(AnimCurveHeader* pHeader, CurveOffset& nameSize) {
@@ -379,7 +379,7 @@ void ParticleManager::Calc() {
                         reinterpret_cast<u8*>(pNames) + nameSize);
                     memcpy(&postTransform, pPostField, sizeof(postTransform));
                     if (pHeader->nameTable > 4) {
-                        pPostResource = reinterpret_cast<EmitterResource*>(pNames->datas[pPostField->mEffectIndex].work);
+                        pPostResource = PortPtr<EmitterResource*>(pNames->datas[pPostField->mEffectIndex].work);
                     }
                 }
                 if (pHeader->keyTable != 0) {

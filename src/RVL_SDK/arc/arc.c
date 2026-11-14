@@ -26,8 +26,8 @@ BOOL ARCInitHandle(void* arcStart, ARCHandle* handle) {
     }
 
     handle->archiveStartAddr = arcStart;
-    handle->FSTStart = FSTEntries = (FSTEntry*)((u32)arcStart + arcHeader->fstStart);
-    handle->fileStart = (void*)((u32)arcStart + arcHeader->fileStart);
+    handle->FSTStart = FSTEntries = (FSTEntry*)((uintptr_t)arcStart + arcHeader->fstStart);
+    handle->fileStart = (void*)((uintptr_t)arcStart + arcHeader->fileStart);
     handle->entryNum = nextDir(FSTEntries, 0);
     handle->FSTStringStart = (char*)&FSTEntries[handle->entryNum];
     handle->FSTLength = (u32)arcHeader->fstSize;
@@ -221,7 +221,7 @@ BOOL ARCGetCurrentDir(ARCHandle* handle, char* path, u32 maxlen) {
 
 void* ARCGetStartAddrInMem(ARCFileInfo* af) {
     ARCHandle* handle = af->handle;
-    return (void*)((u32)handle->archiveStartAddr + af->startOffset);
+    return (void*)((uintptr_t)handle->archiveStartAddr + af->startOffset);
 }
 
 u32 ARCGetLength(ARCFileInfo* af) {

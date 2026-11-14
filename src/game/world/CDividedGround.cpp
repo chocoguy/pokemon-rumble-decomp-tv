@@ -24,7 +24,7 @@
 namespace {
 
 template <typename T> inline const void* OffsetToPtr(const T* pBase, s32 offset) {
-    return reinterpret_cast<const void*>(offset + reinterpret_cast<s32>(pBase));
+    return reinterpret_cast<const void*>(offset + reinterpret_cast<intptr_t>(pBase));
 }
 
 inline u32 GetNodeCount(nw4r::g3d::ResAnmChr& rAnm) {

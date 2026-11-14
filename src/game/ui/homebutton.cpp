@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 
-std::tr1::shared_ptr<CFileData> OpenFileData(const char* pPath, unsigned long flags);
+std::tr1::shared_ptr<CFileData> OpenFileData(const char* pPath, u32 flags);
 void WaitFileData(CFileData* pFile, int allowYield);
 std::tr1::shared_ptr<unsigned char> DecompressLZ(const void* pData);
 std::tr1::shared_ptr<unsigned char> DecompressHuffman(const void* pData);
@@ -525,7 +525,7 @@ void UpdateHomeButton() {
                     break;
                 case 4:
                     OSReport("Jump to NetworkManual.\n");
-                    NResetMgr::RequestLaunchManualViewer(reinterpret_cast<u32>("lmv"));
+                    NResetMgr::RequestLaunchManualViewer(PortAddr("lmv"));
                     break;
                 }
             }

@@ -78,12 +78,18 @@ static BOOL __GXShutdown(BOOL final, u32 event);
 
 static OSShutdownFunctionInfo GXShutdownFuncInfo = {__GXShutdown, 127};
 
+#if !defined(PORT) /* port version below */
 static void EnableWriteGatherPipe(void) {
     u32 hid2 = PPCMfhid2();
     PPCMtwpar(OSUncachedToPhysical((void*)GX_FIFO_ADDR));
     hid2 |= 0x40000000;
     PPCMthid2(hid2);
 }
+#else
+static void EnableWriteGatherPipe(void) {
+    /* No write-gather hardware on the port: commands go through port_gx_pipe.h. */
+}
+#endif
 
 static GXTexRegion* __GXDefaultTexRegionCallback(const GXTexObj* t_obj, GXTexMapID id) {
     GXTexFmt fmt;

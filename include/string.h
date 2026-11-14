@@ -1,3 +1,8 @@
+#if defined(PORT)
+/* The port uses the system C library; see port/include/port_libc.h for the additions. */
+#include_next <string.h>
+#include <port_libc.h>
+#else
 #ifndef _STRING_H
 #define _STRING_H
 
@@ -33,4 +38,5 @@ void* __memrchr(const void* src, int value, size_t count) _MSL_CANT_THROW;
 }
 #endif
 
+#endif
 #endif

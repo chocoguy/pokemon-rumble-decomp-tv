@@ -219,7 +219,7 @@ ResTev ResTev::CopyTo(void* pDst) {
     detail::Copy32ByteBlocks(pDst, pSrc, sizeof(ResTevData));
 
     ResTev tev(pDst);
-    tev.ref().toResMdlData -= reinterpret_cast<u32>(pDst) - reinterpret_cast<u32>(pSrc);
+    tev.ref().toResMdlData -= static_cast<s32>(reinterpret_cast<intptr_t>(pDst) - reinterpret_cast<intptr_t>(pSrc));
 
     tev.DCStore(false);
     return tev;

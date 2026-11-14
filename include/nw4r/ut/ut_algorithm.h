@@ -22,14 +22,8 @@ template <typename T> inline T Abs(T x) {
     return x < 0 ? static_cast<T>(-x) : static_cast<T>(x);
 }
 
-template <> f32 inline Abs(register f32 x) {
-    register f32 ax;
-
-    asm (
-        fabs ax, x
-    )
-
-    return ax;
+template <> f32 inline Abs(f32 x) {
+    return __builtin_fabsf(x);
 }
 
 template <typename T> inline T BitExtract(T bits, int pos, int len) {
@@ -41,8 +35,8 @@ template <typename T> inline bool TestBit(T t, int pos) {
     return BitExtract<T>(t, sizeof(T), pos);
 }
 
-inline u32 GetIntPtr(const void* pPtr) {
-    return reinterpret_cast<u32>(pPtr);
+inline uintptr_t GetIntPtr(const void* pPtr) {
+    return reinterpret_cast<uintptr_t>(pPtr);
 }
 
 template <typename T>
@@ -66,8 +60,8 @@ template <typename T> inline T RoundUp(T t, unsigned int alignment) {
 }
 
 template <typename T> inline void* RoundUp(T* pPtr, unsigned int alignment) {
-    u32 value = reinterpret_cast<u32>(pPtr);
-    u32 rounded = (alignment + value - 1) & ~(alignment - 1);
+    uintptr_t value = reinterpret_cast<uintptr_t>(pPtr);
+    uintptr_t rounded = (alignment + value - 1) & ~static_cast<uintptr_t>(alignment - 1);
     return reinterpret_cast<void*>(rounded);
 }
 
@@ -76,8 +70,8 @@ template <typename T> inline T RoundDown(T t, unsigned int alignment) {
 }
 
 template <typename T> inline void* RoundDown(T* pPtr, unsigned int alignment) {
-    u32 value = reinterpret_cast<u32>(pPtr);
-    u32 rounded = value & ~(alignment - 1);
+    uintptr_t value = reinterpret_cast<uintptr_t>(pPtr);
+    uintptr_t rounded = value & ~static_cast<uintptr_t>(alignment - 1);
     return reinterpret_cast<void*>(rounded);
 }
 

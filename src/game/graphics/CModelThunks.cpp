@@ -59,5 +59,7 @@ void RequestModelThunks(CModel* pModel, const nw4r::g3d::ResMdl& rModel) {
 #pragma dont_inline off
 
 namespace std {
+#if !defined(PORT) /* CodeWarrior-only specialization */
 template <> vector<tr1::shared_ptr<nw4r::g3d::AnmObj> >::~vector();
+#endif
 }

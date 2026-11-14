@@ -1,14 +1,20 @@
 #define SAVEDATA_EMISSION_LAYOUT
 #include <typeinfo>
 namespace SaveDataEmission {
+#if !defined(PORT) /* CodeWarrior's name for the type info of void (*)(void*) */
 extern "C" const std::type_info __RTTI__PFPv_v;
+#endif
 template <typename T> struct FreeDeleterType { static void Free(void*) throw(); };
 template <typename T> const std::type_info& EmitFreeDeleterTypeInfo() { return typeid(&FreeDeleterType<T>::Free); }
 template <typename D> struct DeleterTypeInfo {
     static const std::type_info& Get() { return typeid(D); }
 };
 template <> struct DeleterTypeInfo<void (*)(void*) throw()> {
+#if defined(PORT)
+    static const std::type_info& Get() { return typeid(void (*)(void*)); }
+#else
     static const std::type_info& Get() { return __RTTI__PFPv_v; }
+#endif
 };
 }
 class SD_PiiPersonalData;
@@ -18,12 +24,14 @@ class SlotData;
 class SD_StatisticValue;
 class UsedPassword;
 #include <vector>
+#if !defined(PORT) /* only forced CodeWarrior's instantiation order; needs incomplete types */
 typedef char UsedPasswordVectorStorage[sizeof(std::__vec_deleter<UsedPassword, std::allocator<UsedPassword> >)];
 typedef char SD_StatisticValueVectorStorage[sizeof(std::__vec_deleter<SD_StatisticValue, std::allocator<SD_StatisticValue> >)];
 typedef char SlotDataVectorStorage[sizeof(std::__vec_deleter<SlotData, std::allocator<SlotData> >)];
 typedef char SD_BattleRoyalDataVectorStorage[sizeof(std::__vec_deleter<SD_BattleRoyalData, std::allocator<SD_BattleRoyalData> >)];
 typedef char SD_PiiCollectionDataVectorStorage[sizeof(std::__vec_deleter<SD_PiiCollectionData, std::allocator<SD_PiiCollectionData> >)];
 typedef char SD_PiiPersonalDataVectorStorage[sizeof(std::__vec_deleter<SD_PiiPersonalData, std::allocator<SD_PiiPersonalData> >)];
+#endif
 #include <game/io/SaveData.h>
 
 #include <game/io/FileList.h>

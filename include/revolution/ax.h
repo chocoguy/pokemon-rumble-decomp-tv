@@ -193,7 +193,11 @@ typedef struct _AXVPB {
     void* next1;
     u32 priority;
     AXVoiceCallback callback;
+#if defined(PORT)
+    uintptr_t userContext; /* carries a pointer */
+#else
     u32 userContext;
+#endif
     u32 index;
     u32 sync;
     u32 depop;
@@ -488,7 +492,11 @@ void __AXRemoveFromStack(AXVPB* vpb);
 void __AXPushStackHead(AXVPB* vpb, u32 prio);
 AXVPB* __AXPopStackFromBottom(u32 prio);
 void AXFreeVoice(AXVPB* vpb);
+#if defined(PORT)
+AXVPB* AXAcquireVoice(u32 prio, AXVoiceCallback callback, uintptr_t userContext);
+#else
 AXVPB* AXAcquireVoice(u32 prio, AXVoiceCallback callback, u32 userContext);
+#endif
 void AXSetVoicePriority(AXVPB* vpb, u32 prio);
 
 void __AXServiceVPB(AXVPB* vpb);

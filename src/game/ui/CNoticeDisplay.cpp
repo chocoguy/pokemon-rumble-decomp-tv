@@ -37,9 +37,13 @@ template<typename T> inline T* shared_ptr<T>::operator->() const {
     return ptr_;
 }
 }}
+#if defined(PORT)
+namespace NoticeMath { using ::ceil; }
+#else
 namespace NoticeMath {
 extern "C" __attribute__((nothrow)) double ceil(double);
 }
+#endif
 
 IUIInput* GetUIInput();
 bool IsStage7EvenMap(MapIndex index);

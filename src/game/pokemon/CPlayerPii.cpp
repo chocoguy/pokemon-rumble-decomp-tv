@@ -60,9 +60,14 @@ const char* CPlayerPii::GetShadowName() const
         ShadowAddress value;
     } address;
 
+#if defined(PORT)
+    (void)address; // the round trip through an integer only shaped CodeWarrior's output
+    CPlayer* pPlayer = mpPlayer;
+#else
     address.pObject = this;
     address.value = static_cast<ShadowAddress>(reinterpret_cast<u32>(address.pObject));
     CPlayer* pPlayer = reinterpret_cast<const CPlayerPii*>(address.value)->mpPlayer;
+#endif
     const ShadowNames names = {{"5:/misc.arc/p1.brres", "5:/misc.arc/p2.brres", "5:/misc.arc/p3.brres", "5:/misc.arc/p4.brres"}};
     return names.mNames[pPlayer->GetPlayerNo()];
 }
@@ -78,10 +83,18 @@ bool CPlayerPii::IsVisible() const
     return false;
 }
 
+#if !defined(PORT) /* instantiates a CodeWarrior-only Generation struct */
 enum { DEQUE_SWAP_GENERATION_SIZE = sizeof(std::DequeSwapGeneration<void*>) };
+#endif
 
+#if !defined(PORT) /* instantiates a CodeWarrior-only Generation struct */
 enum { DEQUE_CONSTRUCT_GENERATION_SIZE = sizeof(std::DequeConstructGeneration<void*>) };
+#endif
 
+#if !defined(PORT) /* instantiates a CodeWarrior-only Generation struct */
 enum { DEQUE_MINIMUM_GENERATION_SIZE = sizeof(std::DequeMinimumGeneration<void*>) };
+#endif
 
+#if !defined(PORT) /* instantiates a CodeWarrior-only Generation struct */
 enum { DEQUE_DISTANCE_GENERATION_SIZE = sizeof(std::DequeDistanceGeneration<void*>) };
+#endif

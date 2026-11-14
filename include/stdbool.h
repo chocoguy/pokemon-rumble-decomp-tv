@@ -1,3 +1,8 @@
+#if defined(PORT)
+/* The port uses the system C library; see port/include/port_libc.h for the additions. */
+#include_next <stdbool.h>
+#include <port_libc.h>
+#else
 #ifndef STDBOOL_H
 #define STDBOOL_H
 
@@ -9,4 +14,5 @@ typedef unsigned char bool;
 #define true 1
 #endif
 
+#endif
 #endif

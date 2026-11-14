@@ -101,7 +101,7 @@ namespace nw4r { namespace snd
 			                              detail::WaveInfo *waveData,
 			                              void const *waveSoundData, int index,
 			                              int noteIndex,
-			                              u32 userData) const;
+			                              uintptr_t userData) const;
 
 		private:
 
@@ -135,9 +135,11 @@ namespace nw4r { namespace snd
 		bool LoadGroup(int id, SoundMemoryAllocatable *pAllocatable, u32 blockSize) {
 			return LoadGroup(static_cast<u32>(id), pAllocatable, blockSize);
 		}
+#if !defined(PORT) /* same type as u32 on the port */
 		bool LoadGroup(unsigned int id, SoundMemoryAllocatable *pAllocatable, u32 blockSize) {
 			return LoadGroup(static_cast<u32>(id), pAllocatable, blockSize);
 		}
+#endif
 
 		bool IsLoadedGroup(u32 groupId) const;
 

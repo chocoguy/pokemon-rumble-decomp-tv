@@ -412,15 +412,15 @@ public:
 
     void reserve(size_type n) {
         if (n > this->cap()) {
-            reallocate(n);
+            this->reallocate(n);
         }
     }
 
     void resize(size_type n) {
         if (n > this->size_) {
-            append(n - this->size_);
+            this->append(n - this->size_);
         } else if (n < this->size_) {
-            erase_at_end(this->size_ - n);
+            this->erase_at_end(this->size_ - n);
         }
     }
 
@@ -438,7 +438,7 @@ public:
     template <typename Iterator> void assign(Iterator first, Iterator last, Metrowerks::int2type<true>) {
         size_type n = std::distance(first, last);
         if (n > this->cap()) {
-            size_type capacity = recommend(n - this->cap());
+            size_type capacity = this->recommend(n - this->cap());
             clear();
             if (this->data_) {
                 this->alloc().deallocate(this->data_, this->cap());
@@ -470,7 +470,7 @@ public:
     template <typename Iterator> void assign(Iterator first, Iterator last, Metrowerks::int2type<false>) {
         size_type capacity;
         size_type n = std::distance(first, last);
-        if (n <= this->cap() || grow_by(n - this->cap(), capacity)) {
+        if (n <= this->cap() || this->grow_by(n - this->cap(), capacity)) {
             Iterator mid(first);
             std::advance(mid, std::min(n, this->size_));
             copy_range(first, mid, this->data_);
@@ -528,9 +528,9 @@ protected:
     void push_back(const T& x, Metrowerks::int2type<true>) {
         if (this->size_ < this->cap()) {
             ++this->size_;
-            back() = x;
+            this->back() = x;
         } else {
-            push_back_realloc(x);
+            this->push_back_realloc(x);
         }
     }
 
@@ -539,7 +539,7 @@ protected:
             this->alloc().construct(end(), x);
             ++this->size_;
         } else {
-            push_back_realloc(x);
+            this->push_back_realloc(x);
         }
     }
 
@@ -548,7 +548,7 @@ protected:
     void clear(Metrowerks::int2type<false>) { base::clear(); }
 
     void allocate(size_type n, pod_type) {
-        if (n > max_size()) {
+        if (n > this->max_size()) {
             this->throw_length_error();
         }
         this->data_ = this->alloc().allocate(n);
@@ -576,7 +576,7 @@ protected:
     template <typename Iterator> void assign_range(Iterator first, Iterator last, std::forward_iterator_tag) {
         size_type capacity;
         size_type n = std::distance(first, last);
-        if (n <= this->cap() || grow_by(n - this->cap(), capacity)) {
+        if (n <= this->cap() || this->grow_by(n - this->cap(), capacity)) {
             Iterator mid(first);
             std::advance(mid, std::min(n, this->size_));
             copy_range(first, mid, this->data_);
@@ -600,7 +600,7 @@ protected:
     template <typename Iterator> void insert_range(T* pos, Iterator first, Iterator last, std::forward_iterator_tag) {
         size_type n = std::distance(first, last);
         if (n != 0) {
-            if ((n <= this->cap() && this->size_ <= this->cap() - n) || grow_by(this->size_ + n - this->cap())) {
+            if ((n <= this->cap() && this->size_ <= this->cap() - n) || this->grow_by(this->size_ + n - this->cap())) {
                 size_type elemsAfter = end() - pos;
                 Iterator mid;
                 if (elemsAfter < n) {
@@ -1007,7 +1007,7 @@ public:
     vector& operator=(const vector& x) { base::operator=(x); return *this; }
 #endif
     template <typename Iterator> vector(Iterator first, Iterator last) : base(first, last) {}
-#if defined(CGAMESESSION_EMISSION_LAYOUT) || defined(CMODEL_THUNK_EMISSION_LAYOUT) || defined(GAME_PIIPROPDATA_EMISSION_LAYOUT)
+#if !defined(PORT) && (defined(CGAMESESSION_EMISSION_LAYOUT) || defined(CMODEL_THUNK_EMISSION_LAYOUT) || defined(GAME_PIIPROPDATA_EMISSION_LAYOUT))
     ~vector();
 #else
     ~vector() {}
@@ -1079,7 +1079,7 @@ public:
     size_type size() const { return this->size_; }
 #endif
     bool empty() const { return this->size_ == 0; }
-#if defined(CMODEL_EMISSION_LAYOUT) || defined(GAME_PIIPROPDATA_EMISSION_LAYOUT)
+#if defined(CMODEL_EMISSION_LAYOUT) || (defined(GAME_PIIPROPDATA_EMISSION_LAYOUT) && !defined(PORT))
     void push_back(const T& x);
 #else
     void push_back(const T& x) {
@@ -1223,7 +1223,7 @@ public:
     iterator end() { void** pEnd = this->data_ + this->size_; return iterator(pEnd); }
     const_iterator end() const { void* const* pEnd = this->data_ + this->size_; return const_iterator(pEnd); }
 
-    T*& operator[](size_type i) { return reinterpret_cast<T**>(base::begin())[i]; }
+    T*& operator[](size_type i) { return static_cast<T**>(static_cast<void*>(base::begin()))[i]; }
 
     vector& operator=(const vector& x) {
         base::operator=(x);

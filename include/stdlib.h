@@ -1,3 +1,8 @@
+#if defined(PORT)
+/* The port uses the system C library; see port/include/port_libc.h for the additions. */
+#include_next <stdlib.h>
+#include <port_libc.h>
+#else
 #ifndef MSL_STDLIB_H
 #define MSL_STDLIB_H
 
@@ -32,4 +37,5 @@ void exit(int status);
 }
 #endif
 
+#endif
 #endif

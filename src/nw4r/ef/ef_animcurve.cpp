@@ -825,7 +825,7 @@ void AnimCurveExecuteF32(u8* pCmdList, f32* pTarget, u32 inputTick, u16 seed, u3
     u16 keyHi;
     u16 frame;
     FloatCurveKeyMatch exact;
-    tick = reinterpret_cast<u32>(reinterpret_cast<void*>(inputTick));
+    tick = inputTick;
 
     if (pCmdList[0] == 0xAB) {
         AnimCurveExecuteBakedF32(pCmdList, pTarget, tick, life);
@@ -1237,7 +1237,7 @@ static inline f32 InterpolateRotationCurve(f32 t, f32 a, f32 b, u8 type) {
 }
 
 void AnimCurveExecuteRotate(u8* pCommandList, f32* pTarget, u32 inputTick, u16 seed, u32 life) {
-    u8* pCmdList = reinterpret_cast<u8*>(reinterpret_cast<u32>(pCommandList));
+    u8* pCmdList = reinterpret_cast<u8*>(reinterpret_cast<uintptr_t>(pCommandList));
 
     u32 loopPeriod;
     u32 fittingCount;
@@ -1310,7 +1310,7 @@ void AnimCurveExecuteRotate(u8* pCommandList, f32* pTarget, u32 inputTick, u16 s
             hash = detail::NextCurveSeed(hash);
         }
         BOOL negate = FALSE;
-        if (*reinterpret_cast<const u8*>(reinterpret_cast<u32>(pRange) + pairBytes) != 0) {
+        if (*reinterpret_cast<const u8*>(reinterpret_cast<uintptr_t>(pRange) + pairBytes) != 0) {
             if ((hash & 0x10000) == 0) {
                 negate = TRUE;
             }
@@ -1379,7 +1379,7 @@ void AnimCurveExecuteRotate(u8* pCommandList, f32* pTarget, u32 inputTick, u16 s
             hashA = detail::NextCurveSeed(hashA);
         }
         BOOL negateA = FALSE;
-        if (*reinterpret_cast<const u8*>(reinterpret_cast<u32>(pRangeA) + pairBytes) != 0) {
+        if (*reinterpret_cast<const u8*>(reinterpret_cast<uintptr_t>(pRangeA) + pairBytes) != 0) {
             if ((hashA & 0x10000) == 0) {
                 negateA = TRUE;
             }
@@ -1423,7 +1423,7 @@ void AnimCurveExecuteRotate(u8* pCommandList, f32* pTarget, u32 inputTick, u16 s
             hashB = detail::NextCurveSeed(hashB);
         }
         BOOL negateB = FALSE;
-        if (*reinterpret_cast<const u8*>(reinterpret_cast<u32>(pRangeB) + pairBytes) != 0) {
+        if (*reinterpret_cast<const u8*>(reinterpret_cast<uintptr_t>(pRangeB) + pairBytes) != 0) {
             if ((hashB & 0x10000) == 0) {
                 negateB = TRUE;
             }
@@ -1480,14 +1480,14 @@ void AnimCurveExecuteRotate(u8* pCommandList, f32* pTarget, u32 inputTick, u16 s
         hashB = detail::NextCurveSeed(hashB);
     }
     BOOL negateA = FALSE;
-    if (*reinterpret_cast<const u8*>(reinterpret_cast<u32>(pRangeA) + pairBytes) != 0) {
+    if (*reinterpret_cast<const u8*>(reinterpret_cast<uintptr_t>(pRangeA) + pairBytes) != 0) {
         if ((hashA & 0x10000) == 0) {
             negateA = TRUE;
         }
         hashA = detail::NextCurveSeed(hashA);
     }
     BOOL negateB = FALSE;
-    if (*reinterpret_cast<const u8*>(reinterpret_cast<u32>(pRangeB) + pairBytes) != 0) {
+    if (*reinterpret_cast<const u8*>(reinterpret_cast<uintptr_t>(pRangeB) + pairBytes) != 0) {
         if ((hashB & 0x10000) == 0) {
             negateB = TRUE;
         }
@@ -1527,7 +1527,7 @@ void AnimCurveExecuteRotate(u8* pCommandList, f32* pTarget, u32 inputTick, u16 s
 }
 
 void AnimCurveExecuteTexture(u8* pCommandList, Particle* pParticle, u32 tick, u16 seed, u32 life) {
-    u8* pCmdList = reinterpret_cast<u8*>(reinterpret_cast<u32>(pCommandList));
+    u8* pCmdList = reinterpret_cast<u8*>(reinterpret_cast<uintptr_t>(pCommandList));
 
     u32 resDiv;
     s32 idx;
@@ -1704,7 +1704,7 @@ void AnimCurveExecuteTexture(u8* pCommandList, Particle* pParticle, u32 tick, u1
         }
     }
 
-    *pChannel = reinterpret_cast<TextureData*>(((const AnimCurveNameTable*)pNameTable)->datas[keyValue.mNameIndex].work);
+    *pChannel = PortPtr<TextureData*>(((const AnimCurveNameTable*)pNameTable)->datas[keyValue.mNameIndex].work);
 
     pParticle->mParameter.mTextureWrap &= (u16)~(0xF << (ch * 4));
     pParticle->mParameter.mTextureWrap |= (u16)((keyValue.mValue & 0xF) << (ch * 4));
@@ -1733,7 +1733,7 @@ void CreateCurveChild(const ChildCurveKey* pKey, u16 seed,
             pSetting = &pRandom->mEntry[(hash >> 16) % pRandom->mCount];
         }
     }
-    EmitterResource* pResource = reinterpret_cast<EmitterResource*>(pNames->datas[pSetting->mNameIndex].work);
+    EmitterResource* pResource = PortPtr<EmitterResource*>(pNames->datas[pSetting->mNameIndex].work);
     if (pResource == nullptr) {
         return;
     }
@@ -1907,7 +1907,7 @@ static inline void FindChildCurveKeyIndex(s32* pIndex, s32 frame, const u16* pKe
 }
 
 void AnimCurveExecuteChild(u8* pCommandList, Particle* pParticle, u32 tick, u16 seed, u32 life) {
-    u8* pCmdList = reinterpret_cast<u8*>(reinterpret_cast<u32>(pCommandList));
+    u8* pCmdList = reinterpret_cast<u8*>(reinterpret_cast<uintptr_t>(pCommandList));
 
     const AnimCurveHeader* pHeader;
     const u8* pKeys;

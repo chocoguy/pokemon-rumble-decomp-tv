@@ -446,7 +446,7 @@ void MmlParser::CommandProc(MmlSeqTrack* pTrack, u32 command, s32 commandArg1,
                 const volatile s16* pVariable =
                     GetVariablePtr(pPlayer, pTrack, commandArg1);
 
-                OSReport("#%08x[%d]: printvar %sVAR_%d(%d) = %d\n", pPlayer,
+                OSReport("#%08x[%d]: printvar %sVAR_%d(%d) = %d\n", PortAddr(pPlayer),
                          pTrack->GetPlayerTrackNo(),
                          commandArg1 >= TRACK_VARIABLE_MIN    ? "T"
                          : commandArg1 >= GLOBAL_VARIABLE_MIN ? "G"

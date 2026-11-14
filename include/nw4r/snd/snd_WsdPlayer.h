@@ -44,7 +44,7 @@ namespace detail
 			                              WaveInfo *waveData,
 			                              void const *waveSoundData, int index,
 			                              int noteIndex,
-			                              u32 userData) const = 0;
+			                              uintptr_t userData) const = 0;
 
 		private:
 		};
@@ -68,7 +68,7 @@ namespace detail
 		bool Prepare(void const *waveSoundBase, int index,
 		             StartOffsetType startOffsetType, int startOffset,
 		             int voiceOutCount, WsdCallback const *callback,
-		             u32 callbackData);
+		             uintptr_t callbackData);
 
 		f32 GetPanRange() const { return mPanRange; }
 		int GetVoiceOutCount() const { return mVoiceOutCount; }
@@ -88,14 +88,14 @@ namespace detail
 	private:
 		static void ChannelCallbackFunc(Channel *dropChannel,
 		                                Channel::ChannelCallbackStatus status,
-		                                u32 userData);
+		                                uintptr_t userData);
 
 		void InitParam(int voiceOutCount, WsdCallback const *callback,
-		               u32 callbackData);
+		               uintptr_t callbackData);
 
 		void Update();
 
-		bool StartChannel(WsdCallback const *callback, u32 callbackData);
+		bool StartChannel(WsdCallback const *callback, uintptr_t callbackData);
 		void UpdateChannel();
 		void CloseChannel();
 
@@ -116,7 +116,7 @@ namespace detail
 		int				mVoiceOutCount;
 		u8				mPriority;
 		WsdCallback		const *mCallback;
-		u32		mCallbackData;
+		uintptr_t		mCallbackData;
 		void			const *mWsdData;
 		int				mWsdIndex;
 		StartOffsetType	mStartOffsetType;

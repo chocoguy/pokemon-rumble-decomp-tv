@@ -27,10 +27,10 @@ inline u8 GetVerticalPosition(u8 packed) {
     return packed / HORIZONTALPOSITION_MAX;
 }
 template <typename T> inline const T* ConvertOffsToPtr(const void* pBase, unsigned int offset) {
-    return reinterpret_cast<const T*>(reinterpret_cast<u32>(pBase) + offset);
+    return reinterpret_cast<const T*>(reinterpret_cast<uintptr_t>(pBase) + offset);
 }
 template <typename T> inline T* ConvertOffsToPtr(void* pBase, unsigned int offset) {
-    return reinterpret_cast<T*>(reinterpret_cast<u32>(pBase) + offset);
+    return reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(pBase) + offset);
 }
 }
 

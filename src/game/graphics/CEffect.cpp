@@ -39,6 +39,13 @@ inline u32 AlignHeap(u32 value) {
     return (value + 31) & ~31;
 }
 
+#if defined(PORT)
+// AlignHeap for an address rather than a size.
+inline uintptr_t AlignHeapAddress(uintptr_t value) {
+    return (value + 31) & ~31;
+}
+#endif
+
 class EmitterWithParam : public nw4r::ef::Emitter {
 public:
     EmitterWithParam() {
@@ -266,7 +273,7 @@ public:
         mLastFreed = nullptr;
         mFirstBlock = nullptr;
         mHeapEnd = static_cast<u8*>(pBuffer) + size;
-        mHeapStart = reinterpret_cast<u8*>(AlignHeap(reinterpret_cast<u32>(pBuffer)));
+        mHeapStart = reinterpret_cast<u8*>(AlignHeapAddress(reinterpret_cast<uintptr_t>(pBuffer)));
         mFreeList = reinterpret_cast<HeapBlock*>(mHeapStart);
         mFreeList->mPrev = nullptr;
         mFreeList->mNext = nullptr;

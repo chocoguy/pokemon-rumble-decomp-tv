@@ -88,7 +88,8 @@ const void* WaveFileReader::GetWaveDataAddress(
         }
         break;
     case 1:
-        pWaveDataAddress = reinterpret_cast<const void*>(mWaveInfo->dataLocation);
+        // An absolute address in the file. Nothing in this game writes one at run time.
+        pWaveDataAddress = PortPtr<const void*>(mWaveInfo->dataLocation);
         break;
     default:
         return nullptr;

@@ -1,3 +1,8 @@
+#if defined(PORT)
+/* The port uses the system C library; see port/include/port_libc.h for the additions. */
+#include_next <float.h>
+#include <port_libc.h>
+#else
 #ifndef MSL_FLOAT_H
 #define MSL_FLOAT_H
 
@@ -21,4 +26,5 @@
 #define DBL_EPSILON 0x1.0000000000000P-52
 #define DBL_MIN 0x1.0000000000000P-1022
 
+#endif
 #endif

@@ -1,3 +1,8 @@
+#if defined(PORT)
+/* The port uses the system C library; see port/include/port_libc.h for the additions. */
+#include_next <stdio.h>
+#include <port_libc.h>
+#else
 #ifndef MSL_STDIO_H
 #define MSL_STDIO_H
 
@@ -27,4 +32,5 @@ size_t __fwrite(const void* buffer, size_t size, size_t count, FILE* file);
 }
 #endif
 
+#endif
 #endif

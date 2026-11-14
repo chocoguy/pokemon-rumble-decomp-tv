@@ -1,3 +1,8 @@
+#if defined(PORT)
+/* The port uses the system C library; see port/include/port_libc.h for the additions. */
+#include_next <math.h>
+#include <port_libc.h>
+#else
 #ifndef _MATH_H
 #define _MATH_H
 
@@ -62,4 +67,5 @@ inline float ceil(float x) {
 }
 #endif
 
+#endif
 #endif

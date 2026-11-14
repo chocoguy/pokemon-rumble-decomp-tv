@@ -1,6 +1,6 @@
 #include "revolution/mem/list.h"
 
-#define GetLink(pList, pObject) ((MEMLink*)((u32)(pObject) + (pList)->offset))
+#define GetLink(pList, pObject) ((MEMLink*)((uintptr_t)(pObject) + (pList)->offset))
 
 void MEMInitList(MEMList* pList, u16 offset) {
     pList->headObject = NULL;

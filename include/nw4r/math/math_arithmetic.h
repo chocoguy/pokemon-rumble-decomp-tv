@@ -22,14 +22,8 @@ f32 FrSqrt(f32 x);
 
 u32 CntBit1(u32 x);
 
-inline f32 FAbs(register f32 x) {
-    register f32 ax;
-
-    asm (
-        fabs ax, x
-    )
-
-    return ax;
+inline f32 FAbs(f32 x) {
+    return __builtin_fabsf(x);
 }
 
 inline f32 FCeil(f32 x) {
@@ -44,19 +38,9 @@ inline f32 FFloor(f32 x) {
     return floor(x);
 }
 
-inline f32 FInv(register f32 x) {
-    register f32 work0, work1, work2, work3;
-
-    asm (
-        fmr  work1, x
-        fres work0, work1
-
-        ps_add   work2, work0, work0
-        ps_mul   work3, work0, work0
-        ps_nmsub work0, work1, work3, work2
-    )
-
-    return work0;
+inline f32 FInv(f32 x) {
+    // The original refined a reciprocal estimate with one Newton step.
+    return 1.0f / x;
 }
 
 inline f32 FMod(f32 x, f32 y) {
@@ -82,15 +66,9 @@ inline f32 FLog(f32 x) {
     return NW4R_MATH_QNAN;
 }
 
-inline f32 FSelect(register f32 value, register f32 ge_zero,
-                   register f32 lt_zero) {
-    register f32 ret;
-
-    asm (
-        fsel ret, value, ge_zero, lt_zero
-    )
-
-    return ret;
+inline f32 FSelect(f32 value, f32 ge_zero, f32 lt_zero) {
+    // fsel: the second operand when value >= 0, otherwise (including NaN) the third.
+    return value >= 0.0f ? ge_zero : lt_zero;
 }
 
 inline f32 U16ToF32(u16 arg) {

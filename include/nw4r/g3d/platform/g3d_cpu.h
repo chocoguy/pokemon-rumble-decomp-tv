@@ -23,24 +23,14 @@ inline f32 U16_0ToF32(const u16 *pPtr) {
     return x;
 }
 
-inline f32 S7_8ToF32(register const s16 *pPtr) {
-    register f32 f;
-
-    asm {
-        psq_l f, 0(pPtr), 1, 7
-    }
-
-    return f;
+inline f32 S7_8ToF32(const s16 *pPtr) {
+    // Quantised load, signed 16-bit with 8 fraction bits.
+    return static_cast<f32>(*pPtr) * (1.0f / 256.0f);
 }
 
-inline f32 S10_5ToF32(register const s16 *pPtr) {
-    register f32 f;
-
-    asm {
-        psq_l f, 0(pPtr), 1, 6
-    }
-
-    return f;
+inline f32 S10_5ToF32(const s16 *pPtr) {
+    // Quantised load, signed 16-bit with 5 fraction bits.
+    return static_cast<f32>(*pPtr) * (1.0f / 32.0f);
 }
 
 inline u8 F32ToU8_0(f32 f) {
@@ -49,22 +39,16 @@ inline u8 F32ToU8_0(f32 f) {
     return x;
 }
 
-inline s16 F32ToS10_5(register f32 f) {
-    s16 x;
-    register s16 *pPtr = &x;
-
-    asm {
-        psq_st f, 0(pPtr), 1, 6
-    }
-
-    return x;
+inline s16 F32ToS10_5(f32 f) {
+    // Quantised store: scale by 2^5, truncate toward zero, saturate.
+    return __OSf32tos16(f * 32.0f);
 }
 
 inline void SetGQR6_S10_5() {
-    OSSetGQR6(OS_GQR_TYPE_S16, 5);
+    // No quantisation registers on the port; the conversions above carry their own scale.
 }
 inline void SetGQR7_S7_8() {
-    OSSetGQR7(OS_GQR_TYPE_S16, 8);
+    // See SetGQR6_S10_5.
 }
 
 namespace detail {

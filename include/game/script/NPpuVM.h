@@ -67,11 +67,11 @@ public:
     }
     void SetStringPtr(const char* pString) {
         mType = TYPE_STRING_PTR;
-        mInt = reinterpret_cast<int>(pString);
+        mInt = static_cast<int>(PortAddr(pString));
     }
     void SetWStringPtr(const wchar_t* pString) {
         mType = TYPE_WSTRING_PTR;
-        mInt = reinterpret_cast<int>(pString);
+        mInt = static_cast<int>(PortAddr(pString));
     }
     void SetReference(CValue* pValue);
     void Increment();
@@ -79,10 +79,10 @@ public:
 
     f32 GetFloat() const { return *reinterpret_cast<const f32*>(&mInt); }
     void SetFloatBits(f32 value) { *reinterpret_cast<f32*>(&mInt) = value; }
-    const char* GetStringPtr() const { return reinterpret_cast<const char*>(mInt); }
-    const wchar_t* GetWStringPtr() const { return reinterpret_cast<const wchar_t*>(mInt); }
-    CValue* GetPointer() const { return reinterpret_cast<CValue*>(mInt); }
-    void SetPointer(CValue* pValue) { mInt = reinterpret_cast<int>(pValue); }
+    const char* GetStringPtr() const { return PortPtr<const char*>(mInt); }
+    const wchar_t* GetWStringPtr() const { return PortPtr<const wchar_t*>(mInt); }
+    CValue* GetPointer() const { return PortPtr<CValue*>(mInt); }
+    void SetPointer(CValue* pValue) { mInt = static_cast<int>(PortAddr(pValue)); }
 
     int mType;
     int mInt;

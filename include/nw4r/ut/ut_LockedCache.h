@@ -20,9 +20,22 @@ void LoadBlocks(void* pDst, void* pSrc, u32 blocks);
 void StoreBlocks(void* pDst, void* pSrc, u32 blocks);
 void StoreData(void* pDst, void* pSrc, u32 size);
 
+#if defined(PORT)
+}
+}
+}
+extern "C" void* PORTLockedCacheBase(void); /* port/os: the calling thread's 16 KB scratch area */
+namespace nw4r {
+namespace ut {
+namespace LC {
+inline void* GetBase() {
+    return PORTLockedCacheBase();
+}
+#else
 inline void* GetBase() {
     return reinterpret_cast<void*>(OS_CACHE_BASE);
 }
+#endif
 
 inline void QueueWait(u32 len) {
     LCQueueWait(len);

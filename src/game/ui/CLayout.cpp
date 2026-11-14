@@ -502,12 +502,16 @@ typedef std::detail::map_compact_tree<CLayout::PaneProgramMap::value_type, Layou
 
 enum LayoutProgramEndAddress {
     LayoutProgramEndZero = 0,
+#if defined(PORT)
+    LayoutProgramEndMaximum = ~static_cast<uintptr_t>(0) // holds a pointer
+#else
     LayoutProgramEndMaximum = 0xffffffff
+#endif
 };
 
 inline CLayout::PaneProgramMap::iterator EndLayoutPanePrograms(CLayout::PaneProgramMap& rMap, LayoutProgramEndAddress& rAddress) {
     rAddress = static_cast<LayoutProgramEndAddress>(reinterpret_cast<unsigned long>(reinterpret_cast<LayoutProgramTree&>(rMap).end_node()));
-    return LayoutProgramTree::iterator(reinterpret_cast<std::detail::tree_node_base*>(rAddress));
+    return LayoutProgramTree::iterator(reinterpret_cast<std::detail::tree_node_base*>(static_cast<uintptr_t>(rAddress)));
 }
 
 inline void FindLayoutPaneProgram(CLayout::PaneProgramMap& rMap, const void* const& pKey, CLayout::PaneProgramMap::iterator& rResult) {

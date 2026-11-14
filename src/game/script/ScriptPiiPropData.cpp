@@ -554,7 +554,7 @@ const u16 gRootSpecies[496] = {
 int GetPiiProp(NPpu::CEngine* pEngine) {
     int form = pEngine->FetchArgCount() >= 2 ? pEngine->PopInt() : 0;
     const PiiSpeciesData* pData = GetPiiSpeciesData(static_cast<u16>(pEngine->PopInt()), static_cast<u8>(form));
-    pEngine->PushInt(reinterpret_cast<int>(pData));
+    pEngine->PushInt(static_cast<int>(PortAddr(pData)));
     return 0;
 }
 
@@ -680,7 +680,7 @@ int SetPiiProps(NPpu::CEngine* pBaseEngine, int formScope) {
     int column = pEngine->FetchArgCount() - 1;
     NPpu::CValue identity;
     pEngine->GetArg(column, identity);
-    const PiiSpeciesData* pData = reinterpret_cast<const PiiSpeciesData*>(identity.ToInt());
+    const PiiSpeciesData* pData = PortPtr<const PiiSpeciesData*>(static_cast<u32>(identity.ToInt()));
     int monsno = pData->GetSpecies();
     int form = pData->GetFormNumber();
     for (--column; column >= 0; --column) {

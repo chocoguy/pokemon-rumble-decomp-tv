@@ -27,7 +27,7 @@ void InitializeCalculationWorker();
 void ShutdownCalculationWorker();
 void InitLocalizedFiles();
 void ResetLocalizedFiles();
-void InitializeSystemMessages(const void* pArchive, const char* pLayoutName, const char* pFontName, unsigned long size, unsigned long flags);
+void InitializeSystemMessages(const void* pArchive, const char* pLayoutName, const char* pFontName, u32 size, u32 flags);
 void SetSystemMessageFonts(const std::tr1::shared_ptr<CLayout::FontMap>& rFonts);
 void RegisterSystemMessageCallback(const std::tr1::function<void()>& rCallback, int phase);
 void SetDefaultFontMap(const std::tr1::weak_ptr<CLayout::FontMap>& rFonts);

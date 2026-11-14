@@ -1259,9 +1259,9 @@ detail::Channel *SoundArchivePlayer::SeqNoteOnCallback::NoteOn(
 bool SoundArchivePlayer::WsdCallback::GetWaveSoundData(
 	detail::WaveSoundInfo *info, detail::WaveSoundNoteInfo *noteInfo,
 	detail::WaveInfo *waveData, void const *waveSoundData, int index,
-	int noteIndex, u32 userData) const
+	int noteIndex, uintptr_t userData) const
 {
-	u32 fileID = userData;
+	u32 fileID = static_cast<u32>(userData); // a file id, not a pointer
 
 	if (!mSoundArchivePlayer.IsAvailable())
 		return false;

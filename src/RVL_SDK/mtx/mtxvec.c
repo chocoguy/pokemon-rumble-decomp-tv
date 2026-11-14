@@ -2,6 +2,7 @@
 
 
 
+#if !defined(PORT) /* port version below */
 asm void PSMTXMultVec
 (
     const register Mtx m,
@@ -34,7 +35,16 @@ asm void PSMTXMultVec
 
     blr
 }
+#else
+void PSMTXMultVec(const Mtx m, const Vec* src, Vec* dst) {
+    f32 x = m[0][0] * src->x + m[0][1] * src->y + m[0][2] * src->z + m[0][3];
+    f32 y = m[1][0] * src->x + m[1][1] * src->y + m[1][2] * src->z + m[1][3];
+    f32 z = m[2][0] * src->x + m[2][1] * src->y + m[2][2] * src->z + m[2][3];
+    dst->x = x; dst->y = y; dst->z = z;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 asm void PSMTXMultVecArray
 (
     const register Mtx    m,
@@ -85,7 +95,16 @@ _mloop:
 
     blr
 }
+#else
+void PSMTXMultVecArray(const Mtx m, const Vec* srcBase, Vec* dstBase, u32 count) {
+    u32 i;
+    for (i = 0; i < count; i++) {
+        PSMTXMultVec(m, &srcBase[i], &dstBase[i]);
+    }
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 asm void PSMTXMultVecSR
 (
     const register Mtx m,
@@ -118,3 +137,11 @@ asm void PSMTXMultVecSR
 
     blr
 }
+#else
+void PSMTXMultVecSR(const Mtx m, const Vec* src, Vec* dst) {
+    f32 x = m[0][0] * src->x + m[0][1] * src->y + m[0][2] * src->z;
+    f32 y = m[1][0] * src->x + m[1][1] * src->y + m[1][2] * src->z;
+    f32 z = m[2][0] * src->x + m[2][1] * src->y + m[2][2] * src->z;
+    dst->x = x; dst->y = y; dst->z = z;
+}
+#endif

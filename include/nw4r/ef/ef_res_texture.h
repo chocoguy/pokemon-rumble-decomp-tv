@@ -8,7 +8,11 @@ namespace nw4r {
 namespace ef {
 
 struct TextureData {
+#if defined(PORT)
+    Ptr32<char> name; /* 4-byte slot in the file */
+#else
     char* name;
+#endif
     u16 width;
     u16 height;
     u32 dataSize;
@@ -21,8 +25,16 @@ struct TextureData {
     u8 mag_filt;
     u8 reserved[1];
     f32 lod_bias;
+#if defined(PORT)
+    Ptr32<u8> texture; /* 4-byte slot in the file */
+#else
     u8* texture;
+#endif
+#if defined(PORT)
+    Ptr32<u8> tlut; /* 4-byte slot in the file */
+#else
     u8* tlut;
+#endif
     u32 reserve[7];
 };
 
@@ -32,7 +44,7 @@ private:
 
 public:
     explicit ResTexture(TextureData* pData = NULL) : mData(pData) {}
-    explicit ResTexture(const ResTexture& rOther) : mData(rOther.mData) {}
+    ResTexture(const ResTexture& rOther) : mData(rOther.mData) {}
 
     bool IsValid() const {
         return mData != NULL;

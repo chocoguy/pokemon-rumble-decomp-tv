@@ -1,3 +1,8 @@
+#if defined(PORT)
+/* The port uses the system C library; see port/include/port_libc.h for the additions. */
+#include_next <stdarg.h>
+#include <port_libc.h>
+#else
 #ifndef __cstdarg__
 #define __cstdarg__
 
@@ -22,4 +27,5 @@ extern void* __va_arg(void*, int);
 }
 #endif
 
+#endif
 #endif

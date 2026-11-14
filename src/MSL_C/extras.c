@@ -3,7 +3,7 @@
 
 int __msl_strnicmp(const char* s1, const char* s2, size_t count);
 
-inline int tolower_inline(int c) {
+static inline int tolower_inline(int c) { // static: C99 inline gives no external definition
     return ((c < 0) || (c >= 0x100)) ? c : (int) (_current_locale.ctype_cmpt_ptr->lower_map_ptr[c]);
 }
 

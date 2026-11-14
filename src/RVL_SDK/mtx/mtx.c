@@ -6,6 +6,7 @@ extern f64 tan(f64);
 
 static f32 Unit01[] = {0.0f, 1.0f};
 
+#if !defined(PORT) /* port version below */
 void PSMTXIdentity(register Mtx m) {
     register f32 c_zero;
     register f32 c_one;
@@ -26,7 +27,15 @@ void PSMTXIdentity(register Mtx m) {
         psq_st      c_10,   40(m),  0, 0
     }
 }
+#else
+void PSMTXIdentity(Mtx m) {
+    m[0][0] = 1.0f; m[0][1] = 0.0f; m[0][2] = 0.0f; m[0][3] = 0.0f;
+    m[1][0] = 0.0f; m[1][1] = 1.0f; m[1][2] = 0.0f; m[1][3] = 0.0f;
+    m[2][0] = 0.0f; m[2][1] = 0.0f; m[2][2] = 1.0f; m[2][3] = 0.0f;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 asm void PSMTXCopy(const register Mtx src,register Mtx dst) {
     nofralloc
 
@@ -45,7 +54,21 @@ asm void PSMTXCopy(const register Mtx src,register Mtx dst) {
 
     blr
 }
+#else
+void PSMTXCopy(const Mtx src, Mtx dst) {
+    int i, j;
+    if (src == (const f32(*)[4])dst) {
+        return;
+    }
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 4; j++) {
+            dst[i][j] = src[i][j];
+        }
+    }
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 asm void PSMTXConcat
 (
     const register Mtx mA,
@@ -153,7 +176,21 @@ asm void PSMTXConcat
 
 #undef UNIT01
 }
+#else
+void PSMTXConcat(const Mtx a, const Mtx b, Mtx ab) {
+    Mtx t;
+    int i;
+    for (i = 0; i < 3; i++) {
+        t[i][0] = a[i][0] * b[0][0] + a[i][1] * b[1][0] + a[i][2] * b[2][0];
+        t[i][1] = a[i][0] * b[0][1] + a[i][1] * b[1][1] + a[i][2] * b[2][1];
+        t[i][2] = a[i][0] * b[0][2] + a[i][1] * b[1][2] + a[i][2] * b[2][2];
+        t[i][3] = a[i][0] * b[0][3] + a[i][1] * b[1][3] + a[i][2] * b[2][3] + a[i][3];
+    }
+    PSMTXCopy(t, ab);
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 void PSMTXConcatArray(const register Mtx a, const register Mtx* srcBase, register Mtx* dstBase, register u32 count) {
     register f32 va0, va1, va2, va3, va4, va5;
     register f32 vb0, vb1, vb2, vb3, vb4, vb5;
@@ -243,7 +280,16 @@ void PSMTXConcatArray(const register Mtx a, const register Mtx* srcBase, registe
         psq_st vd5, 40(dstBase), 0, 0;
     }
 }
+#else
+void PSMTXConcatArray(const Mtx a, const Mtx* srcBase, Mtx* dstBase, u32 count) {
+    u32 i;
+    for (i = 0; i < count; i++) {
+        PSMTXConcat(a, srcBase[i], dstBase[i]);
+    }
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 asm u32 PSMTXInverse(const register Mtx src, register Mtx inv) {
     nofralloc
     psq_l fp0, 0(src), 1, 0
@@ -310,6 +356,34 @@ regular:
     li r3, 1
     blr
 }
+#else
+u32 PSMTXInverse(const Mtx src, Mtx inv) {
+    /* Inverse of the 3x3 part by cofactors; the translation is -inverse * translation. */
+    Mtx t;
+    f32 det;
+    det = src[0][0] * (src[1][1] * src[2][2] - src[1][2] * src[2][1])
+        - src[0][1] * (src[1][0] * src[2][2] - src[1][2] * src[2][0])
+        + src[0][2] * (src[1][0] * src[2][1] - src[1][1] * src[2][0]);
+    if (det == 0.0f) {
+        return 0;
+    }
+    det = 1.0f / det;
+    t[0][0] = (src[1][1] * src[2][2] - src[2][1] * src[1][2]) * det;
+    t[0][1] = -(src[0][1] * src[2][2] - src[2][1] * src[0][2]) * det;
+    t[0][2] = (src[0][1] * src[1][2] - src[1][1] * src[0][2]) * det;
+    t[1][0] = -(src[1][0] * src[2][2] - src[2][0] * src[1][2]) * det;
+    t[1][1] = (src[0][0] * src[2][2] - src[2][0] * src[0][2]) * det;
+    t[1][2] = -(src[0][0] * src[1][2] - src[1][0] * src[0][2]) * det;
+    t[2][0] = (src[1][0] * src[2][1] - src[2][0] * src[1][1]) * det;
+    t[2][1] = -(src[0][0] * src[2][1] - src[2][0] * src[0][1]) * det;
+    t[2][2] = (src[0][0] * src[1][1] - src[1][0] * src[0][1]) * det;
+    t[0][3] = -(t[0][0] * src[0][3] + t[0][1] * src[1][3] + t[0][2] * src[2][3]);
+    t[1][3] = -(t[1][0] * src[0][3] + t[1][1] * src[1][3] + t[1][2] * src[2][3]);
+    t[2][3] = -(t[2][0] * src[0][3] + t[2][1] * src[1][3] + t[2][2] * src[2][3]);
+    PSMTXCopy(t, inv);
+    return 1;
+}
+#endif
 
 void PSMTXRotRad(Mtx m, char axis, f32 rad) {
     f32 sinA, cosA;
@@ -318,6 +392,7 @@ void PSMTXRotRad(Mtx m, char axis, f32 rad) {
     PSMTXRotTrig(m, axis, sinA, cosA);
 }
 
+#if !defined(PORT) /* port version below */
 void PSMTXRotTrig (
     register Mtx    m,
     register char   axis,
@@ -388,7 +463,34 @@ void PSMTXRotTrig (
 
     }
 }
+#else
+void PSMTXRotTrig(Mtx m, char axis, f32 sinA, f32 cosA) {
+    switch (axis) {
+    case 'x':
+    case 'X':
+        m[0][0] = 1.0f; m[0][1] = 0.0f; m[0][2] = 0.0f; m[0][3] = 0.0f;
+        m[1][0] = 0.0f; m[1][1] = cosA; m[1][2] = -sinA; m[1][3] = 0.0f;
+        m[2][0] = 0.0f; m[2][1] = sinA; m[2][2] = cosA; m[2][3] = 0.0f;
+        break;
+    case 'y':
+    case 'Y':
+        m[0][0] = cosA; m[0][1] = 0.0f; m[0][2] = sinA; m[0][3] = 0.0f;
+        m[1][0] = 0.0f; m[1][1] = 1.0f; m[1][2] = 0.0f; m[1][3] = 0.0f;
+        m[2][0] = -sinA; m[2][1] = 0.0f; m[2][2] = cosA; m[2][3] = 0.0f;
+        break;
+    case 'z':
+    case 'Z':
+        m[0][0] = cosA; m[0][1] = -sinA; m[0][2] = 0.0f; m[0][3] = 0.0f;
+        m[1][0] = sinA; m[1][1] = cosA; m[1][2] = 0.0f; m[1][3] = 0.0f;
+        m[2][0] = 0.0f; m[2][1] = 0.0f; m[2][2] = 1.0f; m[2][3] = 0.0f;
+        break;
+    default:
+        break;
+    }
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 static void __PSMTXRotAxisRadInternal(
     register Mtx    m,
     const register Vec *axis,
@@ -448,6 +550,25 @@ static void __PSMTXRotAxisRadInternal(
             psq_st      tmp5, 40(m), 0, 0
     }
 }
+#else
+static void __PSMTXRotAxisRadInternal(Mtx m, const Vec* axis, f32 sT, f32 cT) {
+    Vec n;
+    f32 tT = 1.0f - cT;
+    PSVECNormalize(axis, &n);
+    m[0][0] = tT * n.x * n.x + cT;
+    m[0][1] = tT * n.x * n.y - sT * n.z;
+    m[0][2] = tT * n.x * n.z + sT * n.y;
+    m[0][3] = 0.0f;
+    m[1][0] = tT * n.x * n.y + sT * n.z;
+    m[1][1] = tT * n.y * n.y + cT;
+    m[1][2] = tT * n.y * n.z - sT * n.x;
+    m[1][3] = 0.0f;
+    m[2][0] = tT * n.x * n.z - sT * n.y;
+    m[2][1] = tT * n.y * n.z + sT * n.x;
+    m[2][2] = tT * n.z * n.z + cT;
+    m[2][3] = 0.0f;
+}
+#endif
 
 void PSMTXRotAxisRad(
     Mtx             m,
@@ -462,6 +583,7 @@ void PSMTXRotAxisRad(
     __PSMTXRotAxisRadInternal(m, axis, sinT, cosT);
 }
 
+#if !defined(PORT) /* port version below */
 void PSMTXTrans(
     register Mtx m,
     register f32 xT,
@@ -486,7 +608,15 @@ void PSMTXTrans(
         stfs        c1,      0(m)
     }
 }
+#else
+void PSMTXTrans(Mtx m, f32 xT, f32 yT, f32 zT) {
+    m[0][0] = 1.0f; m[0][1] = 0.0f; m[0][2] = 0.0f; m[0][3] = xT;
+    m[1][0] = 0.0f; m[1][1] = 1.0f; m[1][2] = 0.0f; m[1][3] = yT;
+    m[2][0] = 0.0f; m[2][1] = 0.0f; m[2][2] = 1.0f; m[2][3] = zT;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 asm void PSMTXTransApply(
     const register Mtx src,
     register Mtx dst,
@@ -515,7 +645,17 @@ asm void PSMTXTransApply(
     psq_st      fp8, 40(dst),       0, 0;
     blr;
 }
+#else
+void PSMTXTransApply(const Mtx src, Mtx dst, f32 xT, f32 yT, f32 zT) {
+    /* dst = translation * src */
+    PSMTXCopy(src, dst);
+    dst[0][3] += xT;
+    dst[1][3] += yT;
+    dst[2][3] += zT;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 void PSMTXScale(
     register Mtx m,
     register f32 xS,
@@ -537,7 +677,15 @@ void PSMTXScale(
         stfs        c0,     44(m)
     }
 }
+#else
+void PSMTXScale(Mtx m, f32 xS, f32 yS, f32 zS) {
+    m[0][0] = xS;   m[0][1] = 0.0f; m[0][2] = 0.0f; m[0][3] = 0.0f;
+    m[1][0] = 0.0f; m[1][1] = yS;   m[1][2] = 0.0f; m[1][3] = 0.0f;
+    m[2][0] = 0.0f; m[2][1] = 0.0f; m[2][2] = zS;   m[2][3] = 0.0f;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 asm void PSMTXScaleApply (
     const register Mtx src,
     register Mtx dst,
@@ -569,6 +717,18 @@ asm void PSMTXScaleApply (
     psq_st      fp2, 40(dst),       0, 0;
     blr;
 }
+#else
+void PSMTXScaleApply(const Mtx src, Mtx dst, f32 xS, f32 yS, f32 zS) {
+    /* dst = scale * src: each row scaled by its own factor */
+    const f32 s[3] = {xS, yS, zS};
+    int i, j;
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 4; j++) {
+            dst[i][j] = src[i][j] * s[i];
+        }
+    }
+}
+#endif
 
 void C_MTXLookAt(Mtx m, const Point3d* camPos, const Vec* camUp, const Point3d* target) {
     Vec vLook, vRight, vUp;

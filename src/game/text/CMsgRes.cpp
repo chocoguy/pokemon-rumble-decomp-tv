@@ -167,7 +167,7 @@ void CMsgRes::ConvertEscape() {
     };
     EscapeAddress address;
     address.mPointer = pSrc;
-    pDst = reinterpret_cast<char*>(reinterpret_cast<u32>(pSrc) | address.mBits);
+    pDst = pSrc; // the original ORs the pointer with itself
 
     pEnd = reinterpret_cast<char*>(mpData) + mpData->mHeader.mSize;
 
@@ -626,11 +626,19 @@ wchar_t ConvertCase(wchar_t c, int type) {
     return 0;
 }
 
+#if defined(PORT)
+wchar_t GameTowupper(wchar_t c) {
+#else
 extern "C" wchar_t towupper(wchar_t c) {
+#endif
     return ConvertCase(c, CASE_UPPER);
 }
 
+#if defined(PORT)
+int GameToupper(int c) {
+#else
 extern "C" int toupper(int c) {
+#endif
     if (sTextLocale == TEXT_LOCALE_EUROPE) {
         return ConvertCase(c, CASE_UPPER);
     }

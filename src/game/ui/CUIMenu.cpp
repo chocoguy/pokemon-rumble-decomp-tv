@@ -362,10 +362,14 @@ template <> shared_ptr<IUIListItem>::shared_ptr() : ptr_(nullptr), s_(nullptr) {
 
 namespace std {
 namespace tr1 {
+#if !defined(PORT) /* CodeWarrior-only specialization */
 template <> __declspec(section ".text.menu_prefix") CUIMenuItem* shared_ptr<CUIMenuItem>::operator->() const;
 template <> __declspec(section ".text.menu_prefix") IUIListItem* shared_ptr<IUIListItem>::operator->() const;
 template <> __declspec(section ".text") detail::shared_ptr_deleter<CUIMenuItem, std::detail::default_delete<CUIMenuItem> >::~shared_ptr_deleter();
+#endif
 }
+#if !defined(PORT) /* CodeWarrior-only specialization */
 template <> __declspec(section ".text.menu_prefix") vector<tr1::shared_ptr<IUIListItem> >::vector();
 template <> __declspec(section ".text.menu_prefix") void vector<tr1::shared_ptr<IUIListItem> >::reserve(unsigned long);
+#endif
 }

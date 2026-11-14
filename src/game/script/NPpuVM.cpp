@@ -119,8 +119,8 @@ bool CCode::Load(const char* pName, const SHeader* pHeader, u32, int, int) {
     if (size != 0) {
         mWStrings = static_cast<const wchar_t**>(malloc(size));
         if (pHeader->mWStringDataSize != 0) {
-            u32 address = mCodeSize;
-            address = static_cast<u32>(address + reinterpret_cast<u32>(pHeader));
+            uintptr_t address = mCodeSize;
+            address = address + reinterpret_cast<uintptr_t>(pHeader);
             const wchar_t* p = reinterpret_cast<const wchar_t*>(address + sizeof(SHeader));
             for (int i = 0; i < mWStringCount; i++) {
                 mWStrings[i] = p;
@@ -133,8 +133,8 @@ bool CCode::Load(const char* pName, const SHeader* pHeader, u32, int, int) {
     if (size != 0) {
         mStrings = static_cast<const char**>(malloc(size));
         if (pHeader->mStringDataSize != 0) {
-            u32 address = mCodeSize + pHeader->mWStringDataSize;
-            address = static_cast<u32>(address + reinterpret_cast<u32>(pHeader));
+            uintptr_t address = mCodeSize + pHeader->mWStringDataSize;
+            address = address + reinterpret_cast<uintptr_t>(pHeader);
             const char* p = reinterpret_cast<const char*>(address + sizeof(SHeader));
             for (int i = 0; i < mStringCount; i++) {
                 mStrings[i] = p;
@@ -1692,7 +1692,7 @@ void CEngine::CollectGarbage(int threshold, int) {
 
         CEnvironment* pEnv = nullptr;
         for (std::set<CEngine*>::iterator it = sInstances->begin(); it != sInstances->end(); ++it) {
-            CEngine* pEngine = reinterpret_cast<CEngine*>(reinterpret_cast<u32>(*it));
+            CEngine* pEngine = *it;
             pEnv = pEngine->mEnv;
             for (int i = 0; i < pEngine->mSP; i++) {
                 MarkValue(pEngine->mStack[i]);

@@ -220,6 +220,21 @@ static inline void WriteLightObjPS(const register GXLightObjInt* lt_obj, registe
         psq_st  dy_dz, 0(dest), 0, 0
     }
 }
+#elif defined(PORT)
+static inline void WriteLightObjPS(const GXLightObjInt* lt_obj, void* dest) {
+    /* Three zero words, the color, then the twelve floats from offset 16 (attenuation,
+       position, direction), through the port's command pipe. */
+    const u8* p = (const u8*)lt_obj;
+    int i;
+    (void)dest;
+    PORTGXWrite_u32(0);
+    PORTGXWrite_u32(0);
+    PORTGXWrite_u32(0);
+    PORTGXWrite_u32(*(const u32*)(p + 12));
+    for (i = 0; i < 12; i++) {
+        PORTGXWrite_f32(*(const f32*)(p + 16 + i * 4));
+    }
+}
 #else
 static inline void WriteLightObjPS(const GXLightObjInt* lt_obj, void* dest);
 #endif
@@ -232,7 +247,7 @@ void GXLoadLightObjImm(const GXLightObj* lt_obj, GXLightID light) {
     addr = (0x600 + idx * 0x10);
     GX_WRITE_U8(CP_OPCODE(0, 2));
     GX_WRITE_U32(CP_XF_LOADREGS((addr), 0xF));
-    WriteLightObjPS(obj, (void*)0xCC008000);
+    WriteLightObjPS(obj, (void*)(uintptr_t)0xCC008000);
     gx->bpSentNot = GX_TRUE;
 }
 

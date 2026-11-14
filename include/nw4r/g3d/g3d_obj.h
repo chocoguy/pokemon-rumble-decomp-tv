@@ -40,7 +40,7 @@ public:
 
         u32 GetTypeID() const {
 
-            return reinterpret_cast<u32>(mName);
+            return PortAddr(mName);
         }
 
         const char *GetTypeName() const {

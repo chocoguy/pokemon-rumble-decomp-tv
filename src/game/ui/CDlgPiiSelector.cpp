@@ -97,6 +97,7 @@ enum { kSelectorPersonalVectorSize = sizeof(std::__vec_deleter<std::tr1::shared_
 
 namespace std {
 typedef tr1::shared_ptr<CPiiPersonalData> SelectorPersonalPointer;
+#if !defined(PORT) /* CodeWarrior-only specialization */
 template <> SelectorPersonalPointer* __move_backward<SelectorPersonalPointer*, SelectorPersonalPointer*>(SelectorPersonalPointer*, SelectorPersonalPointer*, SelectorPersonalPointer*);
 template <typename T> struct SelectorMoveBackwardGeneration {
     friend SelectorPersonalPointer* __move_backward<SelectorPersonalPointer*, SelectorPersonalPointer*>(SelectorPersonalPointer* first, SelectorPersonalPointer* last, SelectorPersonalPointer* result) {
@@ -106,6 +107,7 @@ template <typename T> struct SelectorMoveBackwardGeneration {
         return result;
     }
 };
+#endif
 }
 
 u32 GetPokemonVoiceId(u16 species, u16 form);
@@ -1851,14 +1853,20 @@ inline BUI::Callback BUI::CCallbackListOwner::Add(const std::tr1::function<void(
     return Callback();
 }
 
+#if !defined(PORT) /* instantiates a CodeWarrior-only Generation struct */
 enum { kSelectorMoveBackwardGeneration = sizeof(std::SelectorMoveBackwardGeneration<void>) };
+#endif
 
 namespace std {
+#if !defined(PORT) /* CodeWarrior-only specialization */
 template <> __declspec(section ".text.selector_prefix") void __vec_constructor<SelectorListItemPointer, SelectorListItemAllocator, false>::swap(__vec_constructor&);
+#endif
 template <> __declspec(section ".text.selector_prefix") void __vec_deleter<SelectorListItemPointer, SelectorListItemAllocator>::swap(__vec_deleter&);
 template <> __declspec(section ".text.selector_prefix") void __vec_deleter<SelectorListItemPointer, SelectorListItemAllocator>::swap_storage(__vec_deleter&);
 }
 namespace Metrowerks {
+#if !defined(PORT) /* CodeWarrior-only specialization */
 template <> __declspec(section ".text.selector_pairs") void compressed_pair<unsigned long, SelectorListItemAllocator>::swap(compressed_pair&);
+#endif
 template <> __declspec(section ".text.selector_pairs") void detail::CompressedPairStorage<unsigned long, SelectorListItemAllocator, 2>::swap(CompressedPairStorage&);
 }

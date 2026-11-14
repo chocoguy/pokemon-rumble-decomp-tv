@@ -1,3 +1,4 @@
+/* MSL's wide string functions; on the port too (see wchar.h). */
 #ifndef WSTRING_H
 #define WSTRING_H
 

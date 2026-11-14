@@ -92,13 +92,17 @@ namespace std {
 template <> vector<tr1::shared_ptr<MapDesc> >::~vector();
 }
 namespace std {
+#if !defined(PORT) /* CodeWarrior-only specialization */
 template <> inline vector<SD_PiiCollectionData>::~vector() {}
 template <> inline vector<SD_PiiPersonalData>::~vector() {}
 template <> inline vector<SD_BattleRoyalData>::~vector() {}
 template <> inline vector<SD_StatisticValue>::~vector() {}
+#endif
 }
 namespace std {
+#if !defined(PORT) /* defined in the class on the port */
 template <class T, class Alloc> inline vector<T, Alloc>::~vector() {}
+#endif
 }
 namespace NPpu {
 class CEnvironment;
@@ -502,8 +506,8 @@ void CGameSession::LoadFromSlot() {
         if (GetSaveData(-1)->mData.mArea == 0) {
             GetSaveData(-1)->mData.mArea = 1;
         }
-        reinterpret_cast<StageID &>(mPendingMap) = reinterpret_cast<const StageID &>(
-            MakeMapIndex(GetSaveData(-1)->mData.mMode, GetSaveData(-1)->mData.mArea, 0, 1));
+        const MapIndex pendingIndex = MakeMapIndex(GetSaveData(-1)->mData.mMode, GetSaveData(-1)->mData.mArea, 0, 1);
+        reinterpret_cast<StageID &>(mPendingMap) = reinterpret_cast<const StageID &>(pendingIndex);
     }
     SetGCRumbleEnabled(GetOption() == 0);
 }

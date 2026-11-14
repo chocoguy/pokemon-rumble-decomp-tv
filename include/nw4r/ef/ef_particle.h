@@ -24,7 +24,11 @@ struct ParticleParameterDesc {
     math::VEC2 textureScale[TEX_LAYER_MAX];
     f32 textureRotate[TEX_LAYER_MAX];
     math::VEC2 textureTranslate[TEX_LAYER_MAX];
+#if defined(PORT)
+    Ptr32<TextureData> mTexture[TEX_LAYER_MAX]; /* 4-byte slot in the file */
+#else
     TextureData* mTexture[TEX_LAYER_MAX];
+#endif
     u16 textureWrap;
     u8 textureReverse;
     u8 mACmpRef0;

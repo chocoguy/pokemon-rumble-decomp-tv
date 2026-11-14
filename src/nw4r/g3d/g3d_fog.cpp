@@ -32,6 +32,7 @@ void Fog::Init() {
     }
 }
 
+#if !defined(PORT) /* port version below */
 Fog Fog::CopyTo(register void *pDst) const {
     if (pDst != NULL && IsValid()) {
         register const FogData *pSrc = ptr();
@@ -62,6 +63,17 @@ Fog Fog::CopyTo(register void *pDst) const {
 
     return Fog(NULL);
 }
+#else
+Fog Fog::CopyTo(void* pDst) const {
+    // FogData is 48 bytes with no pointers; the original copies it as six doubles.
+    typedef char FogDataIs48Bytes[sizeof(FogData) == 48 ? 1 : -1];
+    if (pDst != NULL && IsValid()) {
+        __builtin_memcpy(pDst, ptr(), 48);
+        return Fog(static_cast<FogData*>(pDst));
+    }
+    return Fog(NULL);
+}
+#endif
 
 void Fog::SetFogRangeAdjParam(u16 width, u16 center, const math::MTX44 &rProjMtx) {
     if (!IsValid()) {

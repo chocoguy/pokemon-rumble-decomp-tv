@@ -712,6 +712,9 @@ inline void CDlgPiiListImpl::Setup(bool background) {
     mUIManager->SetFocusedUI(mPiiList.get());
 }
 
+#if defined(PORT)
+} // a member of BUI cannot be defined inside the anonymous namespace
+#endif
 inline BUI::Callback BUI::CCallbackListOwner::Add(const std::tr1::function<void(BUI*)>& rCallback) {
     if (rCallback) {
         Callback callback(new std::tr1::function<void(BUI*)>(rCallback));
@@ -721,6 +724,9 @@ inline BUI::Callback BUI::CCallbackListOwner::Add(const std::tr1::function<void(
     }
     return Callback();
 }
+#if defined(PORT)
+namespace {
+#endif
 
 inline void CDlgPiiListImpl::RunSell() {
     PiiList sellList;

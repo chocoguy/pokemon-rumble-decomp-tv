@@ -420,8 +420,7 @@ inline void CTitleSession::Run() {
             case SCREEN_DELETE:
                 if (shownSelection < SLOT_COUNT) {
                     mMsgWin->SetDefaultYes(false);
-                    if (mMsgWin->AskYesNo(FormatMessage(GetMessageString(0x600E0, L"{1}を さくじょします
-よろしいですか？"),
+                    if (mMsgWin->AskYesNo(FormatMessage(GetMessageString(0x600E0, L"{1}を さくじょします\nよろしいですか？"),
                                                         GetMessageString(0x600DD + shownSelection, L"セーブデータ A"))
                                               .c_str())) {
                         mMsgWin->SetDefaultYes(false);

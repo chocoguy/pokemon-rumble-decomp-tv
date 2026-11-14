@@ -42,10 +42,10 @@ f32 TextWriterBase<T>::GetLineHeight() const {
 template <typename T>
 f32 TextWriterBase<T>::CalcFormatStringWidth(const T *format, ...) const {
     Rect rect;
-    __va_list_struct args;
+    va_list args;
 
     va_start(args, format);
-    CalcVStringRect(&rect, format, &args);
+    CalcVStringRect(&rect, format, args);
     va_end(args);
 
     return rect.GetWidth();
@@ -54,10 +54,10 @@ f32 TextWriterBase<T>::CalcFormatStringWidth(const T *format, ...) const {
 template <typename T>
 f32 TextWriterBase<T>::CalcFormatStringHeight(const T *format, ...) const {
     Rect rect;
-    __va_list_struct args;
+    va_list args;
 
     va_start(args, format);
-    CalcVStringRect(&rect, format, &args);
+    CalcVStringRect(&rect, format, args);
     va_end(args);
 
     return rect.GetHeight();
@@ -65,10 +65,10 @@ f32 TextWriterBase<T>::CalcFormatStringHeight(const T *format, ...) const {
 
 template <typename T>
 void TextWriterBase<T>::CalcFormatStringRect(Rect *rect, const T *format, ...) const {
-    __va_list_struct args;
+    va_list args;
 
     va_start(args, format);
-    CalcVStringRect(rect, format, &args);
+    CalcVStringRect(rect, format, args);
     va_end(args);
 }
 
@@ -111,9 +111,9 @@ void TextWriterBase<T>::CalcStringRect(Rect *rect, const T *str, int len) const 
 template <typename T>
 f32 TextWriterBase<T>::Printf(const T *format, ...) {
     va_list args;
-    va_start(args[0], format);
+    va_start(args, format);
     f32 width = VPrintf(format, args);
-    va_end(args[0]);
+    va_end(args);
     return width;
 }
 
@@ -145,9 +145,9 @@ f32 TextWriterBase<T>::Print(const T *str, int len) {
 template <typename T>
 f32 TextWriterBase<T>::PrintfMutable(const T *format, ...) {
     va_list args;
-    va_start(args[0], format);
+    va_start(args, format);
     f32 width = VPrintfMutable(format, args);
-    va_end(args[0]);
+    va_end(args);
     return width;
 }
 

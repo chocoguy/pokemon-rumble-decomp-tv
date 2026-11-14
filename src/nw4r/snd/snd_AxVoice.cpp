@@ -176,6 +176,7 @@ void AxVoice::VoiceCallback(void* pArg) {
     AxVoiceManager::GetInstance().ReserveForFreeAxVoice(pVoice);
 }
 
+#if !defined(PORT) /* port version below */
 u32 AxVoice::GetDspAddressBySample(const void* pBase, u32 samples,
                                    SampleFormat format) {
     if (pBase != nullptr) {
@@ -200,7 +201,27 @@ u32 AxVoice::GetDspAddressBySample(const void* pBase, u32 samples,
 
     return addr;
 }
+#else
+u32 AxVoice::GetDspAddressBySample(const void* pBase, u32 samples, SampleFormat format) {
+    const u32 base = pBase != nullptr ? OSCachedToPhysical(pBase) : 0;
+    u32 addr = 0;
+    switch (format) {
+    case SAMPLE_FORMAT_DSP_ADPCM:
+        addr = (samples / AX_ADPCM_SAMPLES_PER_FRAME * AX_ADPCM_NIBBLES_PER_FRAME) +
+               (samples % AX_ADPCM_SAMPLES_PER_FRAME) + (base * sizeof(u16)) + sizeof(u16);
+        break;
+    case SAMPLE_FORMAT_PCM_S8:
+        addr = base + samples;
+        break;
+    case SAMPLE_FORMAT_PCM_S16:
+        addr = base / sizeof(u16) + samples;
+        break;
+    }
+    return addr;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 u32 AxVoice::GetSampleByDspAddress(const void* pBase, u32 addr,
                                    SampleFormat format) {
     if (pBase != nullptr) {
@@ -226,6 +247,26 @@ u32 AxVoice::GetSampleByDspAddress(const void* pBase, u32 addr,
 
     return samples;
 }
+#else
+u32 AxVoice::GetSampleByDspAddress(const void* pBase, u32 addr, SampleFormat format) {
+    const u32 base = pBase != nullptr ? OSCachedToPhysical(pBase) : 0;
+    u32 samples = 0;
+    switch (format) {
+    case SAMPLE_FORMAT_DSP_ADPCM:
+        samples = addr - base * sizeof(u16);
+        samples = (samples % AX_ADPCM_NIBBLES_PER_FRAME) +
+                  (samples / AX_ADPCM_NIBBLES_PER_FRAME * AX_ADPCM_SAMPLES_PER_FRAME) - sizeof(u16);
+        break;
+    case SAMPLE_FORMAT_PCM_S8:
+        samples = addr - base;
+        break;
+    case SAMPLE_FORMAT_PCM_S16:
+        samples = addr - base / sizeof(u16);
+        break;
+    }
+    return samples;
+}
+#endif
 
 void AxVoice::SetPriority(u32 priority) {
     mVpb.SetVoicePriority(priority);

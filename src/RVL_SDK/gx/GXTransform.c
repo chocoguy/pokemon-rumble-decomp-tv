@@ -6,6 +6,7 @@
 
 #pragma optimizewithasm off
 
+#if !defined(PORT) /* port version below */
 static void WriteProjPS(const register f32 proj[6], register volatile void* dest)
 {
     register f32 p01, p23, p45;
@@ -19,7 +20,17 @@ static void WriteProjPS(const register f32 proj[6], register volatile void* dest
         psq_st p45, 0(dest), 0, 0
     }
 }
+#else
+static void WriteProjPS(const f32 proj[6], volatile void* dest) {
+    int i;
+    (void)dest;
+    for (i = 0; i < 6; i++) {
+        PORTGXWrite_f32(proj[i]);
+    }
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 static void Copy6Floats(const register f32 src[6], register f32 dst[6]) {
     register f32 ps_0, ps_1, ps_2;
 
@@ -32,10 +43,18 @@ static void Copy6Floats(const register f32 src[6], register f32 dst[6]) {
         psq_st ps_2, 16(dst), 0, 0
     }
 }
+#else
+static void Copy6Floats(const f32 src[6], f32 dst[6]) {
+    int i;
+    for (i = 0; i < 6; i++) {
+        dst[i] = src[i];
+    }
+}
+#endif
 
 
 void __GXSetProjection(void) {
-    volatile void* wgpipe = (volatile void*)0xCC008000;
+    volatile void* wgpipe = (volatile void*)(uintptr_t)0xCC008000;
     GX_WRITE_U8(0x10);
     GX_WRITE_U32(0x61020);
     WriteProjPS(gx->projMtx, wgpipe);
@@ -72,6 +91,7 @@ void GXGetProjectionv(f32* ptr) {
 }
 
 
+#if !defined(PORT) /* port version below */
 static void  WriteMTXPS3x3from3x4(register void* mtx, register volatile void* dest) {
     register f32 a00_a01, a02_a03, a10_a11;
     register f32 a12_a13, a20_a21, a22_a23;
@@ -90,7 +110,21 @@ static void  WriteMTXPS3x3from3x4(register void* mtx, register volatile void* de
         stfs    a22_a23, 0(dest)
     }
 }
+#else
+static void WriteMTXPS3x3from3x4(void* mtx, volatile void* dest) {
+    /* The 3x3 part of a 3x4 matrix, row by row. */
+    const f32* m = (const f32*)mtx;
+    int r;
+    (void)dest;
+    for (r = 0; r < 3; r++) {
+        PORTGXWrite_f32(m[r * 4 + 0]);
+        PORTGXWrite_f32(m[r * 4 + 1]);
+        PORTGXWrite_f32(m[r * 4 + 2]);
+    }
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 static void WriteMTXPS4x3(const register f32 src[3][4], register volatile void* dst) {
     register f32 ps_0, ps_1, ps_2, ps_3, ps_4, ps_5;
 
@@ -110,7 +144,19 @@ static void WriteMTXPS4x3(const register f32 src[3][4], register volatile void* 
         psq_st ps_5, 0(dst),  0, 0
     }
 }
+#else
+static void WriteMTXPS4x3(const f32 src[3][4], volatile void* dst) {
+    int r, c;
+    (void)dst;
+    for (r = 0; r < 3; r++) {
+        for (c = 0; c < 4; c++) {
+            PORTGXWrite_f32(src[r][c]);
+        }
+    }
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 static void WriteMTXPS4x2(const register f32 mtx[3][4], register volatile void* dest) {
     register f32 a00_a01, a02_a03;
     register f32 a10_a11, a12_a13;
@@ -128,6 +174,18 @@ static void WriteMTXPS4x2(const register f32 mtx[3][4], register volatile void* 
         psq_st  a12_a13, 0(dest), 0, 0
     }
 }
+#else
+static void WriteMTXPS4x2(const f32 mtx[3][4], volatile void* dest) {
+    /* The first two rows: texture matrices with two outputs. */
+    int r, c;
+    (void)dest;
+    for (r = 0; r < 2; r++) {
+        for (c = 0; c < 4; c++) {
+            PORTGXWrite_f32(mtx[r][c]);
+        }
+    }
+}
+#endif
 
 
 void GXLoadPosMtxImm(const f32 mtx[3][4], u32 id) {
@@ -137,7 +195,7 @@ void GXLoadPosMtxImm(const f32 mtx[3][4], u32 id) {
     reg = CP_XF_LOADREGS(addr, 11);
     GX_WRITE_U8(CP_OPCODE(0, CP_CMD_XF_LOADREGS));
     GX_WRITE_U32(reg);
-    WriteMTXPS4x3(mtx, (volatile void*)GX_FIFO_ADDR);
+    WriteMTXPS4x3(mtx, (volatile void*)(uintptr_t)GX_FIFO_ADDR);
 }
 
 void GXLoadPosMtxIndx(u16 mtx_indx, u32 id) {
@@ -163,7 +221,7 @@ void GXLoadNrmMtxImm(const f32 mtx[3][4], u32 id) {
     GX_WRITE_U8(CP_OPCODE(0, CP_CMD_XF_LOADREGS));
     GX_WRITE_U32(reg);
 
-    WriteMTXPS3x3from3x4((void*)mtx, (volatile void*)0xCC008000);
+    WriteMTXPS3x3from3x4((void*)mtx, (volatile void*)(uintptr_t)0xCC008000);
 }
 
 void GXLoadNrmMtxIndx3x3(u16 mtx_indx, u32 id) {
@@ -202,9 +260,9 @@ void GXLoadTexMtxImm(const f32 mtx[3][4], u32 id, GXTexMtxType type) {
     GX_WRITE_U32(reg);
 
     if (type == GX_MTX3x4) {
-        WriteMTXPS4x3(mtx, (volatile void*)GX_FIFO_ADDR);
+        WriteMTXPS4x3(mtx, (volatile void*)(uintptr_t)GX_FIFO_ADDR);
     } else {
-        WriteMTXPS4x2(mtx, (volatile void*)GX_FIFO_ADDR);
+        WriteMTXPS4x2(mtx, (volatile void*)(uintptr_t)GX_FIFO_ADDR);
     }
 }
 

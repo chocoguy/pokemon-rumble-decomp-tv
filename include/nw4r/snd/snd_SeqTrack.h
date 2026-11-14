@@ -141,7 +141,7 @@ namespace nw4r { namespace snd { namespace detail
 
         static void ChannelCallbackFunc(Channel *dropChannel,
                                         Channel::ChannelCallbackStatus status,
-                                        u32 userData);
+                                        uintptr_t userData);
     public:
         static int const MUTE_RELEASE_VALUE = -1;
         static int const PAUSE_RELEASE_VALUE;

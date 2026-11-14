@@ -247,6 +247,7 @@ extern const f32 sScalarMinScale[1];
 
 using math::detail::gSinCosTbl;
 
+#if !defined(PORT) /* port version below */
 asm bool Normalize(math::VEC3* pOut, const math::VEC3* pIn) {
     nofralloc
     psq_l f3, 0(r4), 0, 0
@@ -276,7 +277,43 @@ zeroLength:
     li r3, 0
     blr
 }
+#else
+// ef's table sine and cosine of an angle in table units. Unlike math::SinCosFIdx it
+// keeps subtracting the range while the angle is >= 65536 once it is past it.
+static void EfSinCosFIdx(f32 fidx, f32* pSin, f32* pCos) {
+    f32 a = __builtin_fabsf(fidx);
+    if (a > 65536.0f) {
+        do {
+            a -= 65536.0f;
+        } while (a >= 65536.0f);
+    }
+    const u16 whole = __OSf32tou16(a);
+    const f32 frac = a - static_cast<f32>(whole);
+    const math::detail::SinCosSample& rSample = gSinCosTbl[whole & 255];
+    const f32 sin = __builtin_fmaf(rSample.sin_delta, frac, rSample.sin_val);
+    *pCos = __builtin_fmaf(rSample.cos_delta, frac, rSample.cos_val);
+    *pSin = fidx >= 0.0f ? sin : -sin;
+}
 
+bool Normalize(math::VEC3* pOut, const math::VEC3* pIn) {
+    // Unit vector, or the input copied unchanged when its length is zero.
+    const f32 x = pIn->x, y = pIn->y, z = pIn->z;
+    const f32 lenSq = (z * z + x * x) + y * y;
+    if (lenSq == 0.0f) {
+        pOut->x = x;
+        pOut->y = y;
+        pOut->z = z;
+        return false;
+    }
+    const f32 s = 1.0f / __builtin_sqrtf(lenSq);
+    pOut->x = x * s;
+    pOut->y = y * s;
+    pOut->z = z * s;
+    return true;
+}
+#endif
+
+#if !defined(PORT) /* port version below */
 asm void _PSSinCosRad(f32* pSinCos, f32 rad) {
     nofralloc
     lfs f0, sRadToFIdx(r2)
@@ -312,7 +349,13 @@ store:
     psq_st f1, 0(r3), 0, 0
     blr
 }
+#else
+void _PSSinCosRad(f32* pSinCos, f32 rad) {
+    EfSinCosFIdx(rad * sRadToFIdx[0], &pSinCos[0], &pSinCos[1]);
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 asm void PSSinCosRad(f32* pSin, f32* pCos, f32 rad) {
     nofralloc
     lfs f0, sRadToFIdx(r2)
@@ -349,7 +392,13 @@ store:
     psq_st f0, 0(r3), 1, 0
     blr
 }
+#else
+void PSSinCosRad(f32* pSin, f32* pCos, f32 rad) {
+    EfSinCosFIdx(rad * sRadToFIdx[0], pSin, pCos);
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 asm math::VEC3& Rotation2VecY(const math::VEC3& rRot, math::VEC3* pVec) {
     nofralloc
     lfs f0, 0(r3)
@@ -445,7 +494,22 @@ build:
     addi r1, r1, 16
     blr
 }
+#else
+math::VEC3& Rotation2VecY(const math::VEC3& rRot, math::VEC3* pVec) {
+    // +Y rotated by Rz * Ry * Rx, angles in radians: column 1 of PSMTX34RotXYZRad.
+    f32 sx, cx, sy, cy, sz, cz;
+    EfSinCosFIdx(rRot.x * sRadToFIdx[0], &sx, &cx);
+    EfSinCosFIdx(rRot.y * sRadToFIdx[0], &sy, &cy);
+    EfSinCosFIdx(rRot.z * sRadToFIdx[0], &sz, &cz);
+    const f32 sysx = sy * sx;
+    pVec->x = __builtin_fmaf(cz, sysx, -(sz * cx));
+    pVec->y = __builtin_fmaf(sz, sysx, cz * cx);
+    pVec->z = cy * sx;
+    return *pVec;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 asm void PSMTX34RotXYZRad(math::MTX34* pMtx, f32 x, f32 y, f32 z) {
     nofralloc
     ps_merge00 f6, f1, f2
@@ -552,7 +616,30 @@ build:
     addi r1, r1, 16
     blr
 }
+#else
+void PSMTX34RotXYZRad(math::MTX34* pMtx, f32 x, f32 y, f32 z) {
+    // Rz * Ry * Rx, angles in radians, no translation.
+    f32 sx, cx, sy, cy, sz, cz;
+    EfSinCosFIdx(x * sRadToFIdx[0], &sx, &cx);
+    EfSinCosFIdx(y * sRadToFIdx[0], &sy, &cy);
+    EfSinCosFIdx(z * sRadToFIdx[0], &sz, &cz);
+    const f32 sysx = sy * sx;
+    pMtx->_00 = cz * cy;
+    pMtx->_10 = sz * cy;
+    pMtx->_20 = -sy;
+    pMtx->_01 = __builtin_fmaf(cz, sysx, -(sz * cx));
+    pMtx->_11 = __builtin_fmaf(sz, sysx, cz * cx);
+    pMtx->_21 = cy * sx;
+    pMtx->_02 = __builtin_fmaf(cz * cx, sy, sz * sx);
+    pMtx->_12 = __builtin_fmaf(sz * cx, sy, -(cz * sx));
+    pMtx->_22 = cy * cx;
+    pMtx->_03 = 0.0f;
+    pMtx->_13 = 0.0f;
+    pMtx->_23 = 0.0f;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 asm math::MTX34* MTX34ScaleNonZero(math::MTX34* pOut, const math::MTX34* pIn, const math::VEC3* pScale) {
     nofralloc
     psq_l f0, 0(r5), 0, 0
@@ -591,7 +678,26 @@ multiply:
     psq_st f7, 40(r3), 0, 0
     blr
 }
+#else
+math::MTX34* MTX34ScaleNonZero(math::MTX34* pOut, const math::MTX34* pIn, const math::VEC3* pScale) {
+    // pIn * scale: columns 0-2 times their factor, translation kept; zero factors become
+    // sMinScale.
+    const f32 s[4] = {
+        pScale->x != 0.0f ? pScale->x : sMinScale[0],
+        pScale->y != 0.0f ? pScale->y : sMinScale[0],
+        pScale->z != 0.0f ? pScale->z : sMinScale[0],
+        1.0f,
+    };
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 4; j++) {
+            pOut->m[i][j] = pIn->m[i][j] * s[j];
+        }
+    }
+    return pOut;
+}
+#endif
 
+#if !defined(PORT) /* port version below */
 asm math::MTX34* MTX34ScaleNonZero(math::MTX34* pOut, const math::VEC3* pScale, const math::MTX34* pIn) {
     nofralloc
     lis r6, sScalarMinScale@ha
@@ -632,6 +738,23 @@ multiply:
     psq_st f2, 40(r3), 0, 0
     blr
 }
+#else
+math::MTX34* MTX34ScaleNonZero(math::MTX34* pOut, const math::VEC3* pScale, const math::MTX34* pIn) {
+    // scale * pIn: each row (translation included) times its factor; zero factors
+    // become sScalarMinScale.
+    const f32 s[3] = {
+        pScale->x != 0.0f ? pScale->x : sScalarMinScale[0],
+        pScale->y != 0.0f ? pScale->y : sScalarMinScale[0],
+        pScale->z != 0.0f ? pScale->z : sScalarMinScale[0],
+    };
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 4; j++) {
+            pOut->m[i][j] = pIn->m[i][j] * s[i];
+        }
+    }
+    return pOut;
+}
+#endif
 
 math::MTX34* MTX34ScaleInv(math::MTX34* pOut, const math::MTX34* pIn, const math::VEC3* pScale) {
     math::VEC3 inv;
@@ -643,6 +766,7 @@ math::MTX34* MTX34ScaleInv(math::MTX34* pOut, const math::MTX34* pIn, const math
 
 const f32 sScalarMinScale[1] = {0.00001f};
 
+#if !defined(PORT) /* port version below */
 asm f32 MTXColLen(const math::MTX34* pMtx, int col) {
     nofralloc
     slwi r4, r4, 2
@@ -668,6 +792,13 @@ asm f32 MTXColLen(const math::MTX34* pMtx, int col) {
     fmuls f1, f1, f0
     blr
 }
+#else
+f32 MTXColLen(const math::MTX34* pMtx, int col) {
+    const f32 a = pMtx->m[0][col], b = pMtx->m[1][col], c = pMtx->m[2][col];
+    const f32 sq = __builtin_fmaf(c, c, a * a) + b * b;
+    return sq == 0.0f ? 0.0f : __builtin_sqrtf(sq);
+}
+#endif
 
 }
 }

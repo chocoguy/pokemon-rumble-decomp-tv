@@ -931,28 +931,36 @@ template <class Traits, class Key> std::tr1::shared_ptr<typename Traits::Obj> CM
 
 #pragma section code_type ".text.model_creators"
 namespace std {
+#if !defined(PORT) /* CodeWarrior-only specialization */
 template <> __declspec(section ".text.model_compare") bool vector<tr1::shared_ptr<nw4r::g3d::AnmObj> >::iterator::operator!=(const iterator&) const;
 template <> __declspec(section ".text.model_iterators")  vector<tr1::shared_ptr<nw4r::g3d::AnmObj> >::iterator vector<tr1::shared_ptr<nw4r::g3d::AnmObj> >::begin();
 template <> __declspec(section ".text.model_iterators")  vector<tr1::shared_ptr<nw4r::g3d::AnmObj> >::iterator::iterator(const iterator&);
 template <> __declspec(section ".text.model_iterators")  tr1::shared_ptr<nw4r::g3d::AnmObj>& vector<tr1::shared_ptr<nw4r::g3d::AnmObj> >::iterator::operator*() const;
 template <> __declspec(section ".text.model_iterators")  vector<tr1::shared_ptr<nw4r::g3d::AnmObj> >::iterator& vector<tr1::shared_ptr<nw4r::g3d::AnmObj> >::iterator::operator++();
 template <> __declspec(section ".text.model_iterators")  vector<tr1::shared_ptr<nw4r::g3d::AnmObj> >::iterator vector<tr1::shared_ptr<nw4r::g3d::AnmObj> >::end();
+#endif
 
 namespace tr1 {
+#if !defined(PORT) /* CodeWarrior-only specialization */
 template <> __declspec(section ".text.model_iterators") nw4r::g3d::AnmObjChrRes* shared_ptr<nw4r::g3d::AnmObjChrRes >::get() const;
 template <> __declspec(section ".text.model_post_push") nw4r::g3d::AnmObjVisRes* shared_ptr<nw4r::g3d::AnmObjVisRes >::get() const;
 template <> __declspec(section ".text.model_post_push") nw4r::g3d::AnmObjChrOverride* shared_ptr<nw4r::g3d::AnmObjChrOverride >::get() const;
 template <> __declspec(section ".text.model_iterators") nw4r::g3d::AnmObj* shared_ptr<nw4r::g3d::AnmObj >::operator->() const;
 template <> __declspec(section ".text.model_vis_assignment") nw4r::g3d::AnmObjVisRes* shared_ptr<nw4r::g3d::AnmObjVisRes >::operator->() const;
 template <> __declspec(section ".text.model_middle") nw4r::g3d::AnmObjChrRootScale* shared_ptr<nw4r::g3d::AnmObjChrRootScale >::operator->() const;
+#endif
 namespace detail {
+#if !defined(PORT) /* CodeWarrior-only specialization */
 template <> __declspec(section ".text.model_chr_deleter") shared_ptr_deleter<nw4r::g3d::AnmObjChrRes, void (*)(nw4r::g3d::G3dObj*) >::~shared_ptr_deleter();
 template <> __declspec(section ".text.model_deleters") shared_ptr_deleter<CModel::TPartialAnm<false>, std::detail::default_delete<CModel::TPartialAnm<false> > >::~shared_ptr_deleter();
 template <> __declspec(section ".text.model_deleters") shared_ptr_deleter<CModel::PartialAnmManager, std::detail::default_delete<CModel::PartialAnmManager > >::~shared_ptr_deleter();
 template <> __declspec(section ".text.model_deleters") shared_ptr_deleter<CModel::CMotionProgram, std::detail::default_delete<CModel::CMotionProgram > >::~shared_ptr_deleter();
 template <> __declspec(section ".text.model_deleters") shared_ptr_deleter<nw4r::g3d::AnmObjVisRes, void (*)(nw4r::g3d::G3dObj*) >::~shared_ptr_deleter();
 template <> __declspec(section ".text.model_deleters") shared_ptr_deleter<nw4r::g3d::AnmObjChrOverride, void (*)(nw4r::g3d::G3dObj*) >::~shared_ptr_deleter();
+#endif
 }
 }
 }
+#if !defined(PORT) /* CodeWarrior-only specialization */
 template <> __declspec(section ".text.model_partial") CModel::TPartialAnm<false>::~TPartialAnm();
+#endif

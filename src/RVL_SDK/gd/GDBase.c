@@ -16,7 +16,7 @@ void GDFlushCurrToMem(void) {
 }
 
 void GDPadCurr32(void) {
-    u32 n = (u32)__GDCurrentDL->ptr & 31;
+    u32 n = (uintptr_t)__GDCurrentDL->ptr & 31;
 
     if (n) {
         for (; n < 32; n++) {

@@ -54,7 +54,7 @@ enum EvaluateStatus {
     NW4R_EF_ES_SKIP,
 };
 
-typedef u32 ForEachParam;
+typedef uintptr_t ForEachParam; /* carries pointers: u32 on the Wii */
 typedef void (*ForEachFunc)(void* pObject, ForEachParam param);
 
 inline u8 ConvertF32RadToU8(f32 rad) {
