@@ -2,6 +2,9 @@
 #define GAME_CPPUENV_H
 
 #include <game/io/CFileData.h>
+#if defined(PORT)
+#include <port_endian.h>
+#endif
 #include <game/script/CPpuEngine.h>
 #include <game/script/NPpuVM.h>
 #include <map>
@@ -77,6 +80,9 @@ public:
         }
         mFile = file;
         mName = pName;
+#if defined(PORT)
+        PortFixupPKC(mFile->GetData(), mFile->GetSize());
+#endif
         return NPpu::CCode::Load(mName.c_str(), static_cast<const NPpu::CCode::SHeader*>(mFile->GetData()), mFile->GetSize(), 0, 0);
     }
 

@@ -1,5 +1,7 @@
 #include "nw4r/snd/snd_WsdFile.h"
 
+#include <port_endian.h>
+
 #include <nw4r/types_nw4r.h>
 
 #include "nw4r/snd/snd_Util.h"
@@ -33,6 +35,9 @@ WsdFileReader::WsdFileReader(void const *wsdData) :
 	mDataBlock	(nullptr),
 	mWaveBlock	(nullptr)
 {
+#if defined(PORT)
+	PortFixupRWSD(const_cast<void *>(wsdData));
+#endif
 
 	if (!IsValidFileHeader(wsdData))
 		return;

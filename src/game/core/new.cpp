@@ -2,6 +2,12 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <new>
+#if defined(PORT)
+#include <port_os.h>
+// Game allocations keep 32-bit addresses, so they come from the address window.
+#define malloc PortGameAlloc
+#define free PortGameFree
+#endif
 
 extern std::new_handler __new_handler;
 

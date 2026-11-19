@@ -1,5 +1,8 @@
 #ifndef NW4R_G3D_RES_RES_FILE_H
 #define NW4R_G3D_RES_RES_FILE_H
+#if defined(PORT)
+#include <port_endian.h>
+#endif
 #include <nw4r/types_nw4r.h>
 
 #include <nw4r/g3d/res/g3d_resanmchr.h>
@@ -31,7 +34,24 @@ struct ResFileData {
 
 class ResFile : public ResCommon<ResFileData> {
 public:
+#if defined(PORT)
+    // Every use of a .brres starts here, so this is where it is converted (port_brres.cpp).
+    explicit ResFile(void *pData = NULL) : ResCommon<ResFileData>((PortFixupBRRES(pData), pData)) {}
+    ResFileData &ref() {
+        return *ptr();
+    }
+    const ResFileData &ref() const {
+        return *ptr();
+    }
+    bool operator==(const ResFile &rOther) const {
+        return ptr() == rOther.ptr();
+    }
+    bool operator!=(const ResFile &rOther) const {
+        return ptr() != rOther.ptr();
+    }
+#else
     NW4R_G3D_RESOURCE_FUNC_DEF(ResFile);
+#endif
 
     void Init();
     void Terminate();

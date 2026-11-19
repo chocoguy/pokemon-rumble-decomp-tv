@@ -182,8 +182,15 @@ inline void ReleaseFromParent(Effect* pEffect);
 template <typename T> class MemoryManagerTmp {
 public:
     MemoryManagerTmp(int num, T* pBuffer) {
+#if defined(PORT)
+        // The link is LinkedObject::mMemoryLink: first on the console, where the vtable
+        // pointer follows the base, but after the vtable pointer here.
+        ut::List_Init(&mFreeList, offsetof(T, mMemoryLink));
+        ut::List_Init(&mActiveList, offsetof(T, mMemoryLink));
+#else
         ut::List_Init(&mFreeList, 0);
         ut::List_Init(&mActiveList, 0);
+#endif
         mObjectSize = sizeof(T);
         mBuffer = pBuffer;
 

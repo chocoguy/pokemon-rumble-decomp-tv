@@ -89,11 +89,11 @@ inline void GDSetChanCtrlLightOff(GXChannelID chan, u32 param, u32 lightMask) {
 }
 
 inline void GDSetChanAmbColor(GXChannelID chan, GXColor color) {
-    LoadXFCmd(GX_XF_REG_AMBIENT0 + (chan & 1), *reinterpret_cast<u32 *>(&color));
+    LoadXFCmd(GX_XF_REG_AMBIENT0 + (chan & 1), (static_cast<u32>(color.r) << 24 | static_cast<u32>(color.g) << 16 | static_cast<u32>(color.b) << 8 | color.a));
 }
 
 inline void GDSetChanMatColor(GXChannelID chan, GXColor color) {
-    LoadXFCmd(GX_XF_REG_MATERIAL0 + (chan & 1), *reinterpret_cast<u32 *>(&color));
+    LoadXFCmd(GX_XF_REG_MATERIAL0 + (chan & 1), (static_cast<u32>(color.r) << 24 | static_cast<u32>(color.g) << 16 | static_cast<u32>(color.b) << 8 | color.a));
 }
 
 }

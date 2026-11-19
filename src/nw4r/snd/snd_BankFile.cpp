@@ -1,5 +1,7 @@
 #include <nw4r/snd/snd_BankFile.h>
 
+#include <port_endian.h>
+
 #include <nw4r/snd/snd_WaveArchive.h>
 
 #include <nw4r/ut/ut_algorithm.h>
@@ -33,6 +35,9 @@ bool BankFileReader::IsValidFileHeader(const void* pBankBin) {
 
 BankFileReader::BankFileReader(const void* pBankBin)
     : mHeader(nullptr), mDataBlock(nullptr), mWaveBlock(nullptr) {
+#if defined(PORT)
+    PortFixupRBNK(const_cast<void*>(pBankBin));
+#endif
     if (!IsValidFileHeader(pBankBin)) {
         return;
     }
@@ -109,15 +114,23 @@ bool BankFileReader::ReadInstInfo(InstInfo* pInfo, int prgNo, int key,
         pInfo->waveDataLocation.index = pParam->waveIndex;
     } else if (pParam->waveDataLocationType ==
                InstInfo::WaveDataLocation::WAVE_DATA_LOCATION_ADDRESS) {
-        if (pParam->waveInfoAddress == nullptr) {
+        if (!pParam->waveInfoAddress) {
             return false;
         }
 
         pInfo->waveDataLocation.type =
             InstInfo::WaveDataLocation::WAVE_DATA_LOCATION_ADDRESS;
+#if defined(PORT)
+        pInfo->waveDataLocation.address = PortPtr<const WaveInfo*>(pParam->waveInfoAddress);
+#else
         pInfo->waveDataLocation.address = pParam->waveInfoAddress;
+#endif
     } else if (pParam->waveDataLocationType ==
                InstInfo::WaveDataLocation::WAVE_DATA_LOCATION_CALLBACK) {
+#if defined(PORT)
+        // A function address from the console build; none of this game's banks has one.
+        return false;
+#else
         if (pParam->waveDataLocationCallback == nullptr) {
             return false;
         }
@@ -125,6 +138,7 @@ bool BankFileReader::ReadInstInfo(InstInfo* pInfo, int prgNo, int key,
         pInfo->waveDataLocation.type =
             InstInfo::WaveDataLocation::WAVE_DATA_LOCATION_CALLBACK;
         pInfo->waveDataLocation.callback = pParam->waveDataLocationCallback;
+#endif
     } else {
         return false;
     }

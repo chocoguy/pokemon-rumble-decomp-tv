@@ -117,7 +117,7 @@ public:
             mpEventHandler->setManager(this);
         }
 
-        nw4hbm::ut::List_Init(&mIDToComponent, 8);
+        nw4hbm::ut::List_Init(&mIDToComponent, offsetof(IDToComponent, mLink)); // 8 on the console
     }
 
     virtual void init();
@@ -166,7 +166,7 @@ protected:
 public:
     PaneManager(EventHandler* pEventHandler, const nw4hbm::lyt::DrawInfo* pDrawInfo, MEMAllocator* pAllocator)
         : Manager(pEventHandler, pAllocator), mpDrawInfo(pDrawInfo) {
-        nw4hbm::ut::List_Init(&mPaneToComponent, 8);
+        nw4hbm::ut::List_Init(&mPaneToComponent, offsetof(PaneToComponent, mLink)); // 8 on the console
     }
 
     virtual ~PaneManager();

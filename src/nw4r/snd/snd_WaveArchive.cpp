@@ -1,5 +1,7 @@
 #include <nw4r/snd/snd_WaveArchive.h>
 
+#include <port_endian.h>
+
 #include <nw4r/ut/ut_algorithm.h>
 
 namespace nw4r {
@@ -8,6 +10,9 @@ namespace detail {
 
 WaveArchiveReader::WaveArchiveReader(const void* pWaveArc)
     : mTableBlock(nullptr), mDataBlock(nullptr) {
+#if defined(PORT)
+    PortFixupRWAR(const_cast<void*>(pWaveArc));
+#endif
     if (!VerifyFileHeader(pWaveArc)) {
         return;
     }

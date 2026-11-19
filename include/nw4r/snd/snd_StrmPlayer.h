@@ -99,7 +99,9 @@ namespace detail
 		{
 
 		public:
+#if !defined(PORT)
 			typedef ut::LinkList<StrmDataLoadTask, 0x2c> LinkList;
+#endif
 
 
 		public:
@@ -125,6 +127,10 @@ namespace detail
 
 			ut::LinkListNode	link;
 		};
+#if defined(PORT)
+		// The class is complete only here, so the node's host offset is taken here.
+		typedef ut::LinkList<StrmDataLoadTask, offsetof(StrmDataLoadTask, link)> StrmDataLoadTaskList;
+#endif
 
 
 	public:
@@ -261,7 +267,11 @@ namespace detail
 		StartOffsetType					mStartOffsetType;
 		int								mStartOffset;
 		StrmHeaderLoadTask				mStrmHeaderLoadTask;
+#if defined(PORT)
+		StrmDataLoadTaskList			mStrmDataLoadTaskList;
+#else
 		StrmDataLoadTask::LinkList		mStrmDataLoadTaskList;
+#endif
 		InstancePool<StrmDataLoadTask>	mStrmDataLoadTaskPool;
 		StrmDataLoadTask				mStrmDataLoadTaskArea[BUFFER_BLOCK_COUNT_MAX];
 		StrmBufferPool					*mBufferPool;

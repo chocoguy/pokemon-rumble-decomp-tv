@@ -6,6 +6,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
+#if defined(PORT)
+#include <port_os.h>
+// The VM keeps addresses into its buffers as 32-bit values (CValue).
+#define malloc PortGameAlloc
+#define free PortGameFree
+#endif
 
 namespace NPpu {
 

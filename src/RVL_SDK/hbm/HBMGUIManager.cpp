@@ -45,9 +45,9 @@ static void drawLine_(f32 x0, f32 y0, f32 x1, f32 y1, f32 z, u8 width, GXColor& 
 
     GXBegin(GX_LINES, GX_VTXFMT0, 2);
     GXPosition3f32(x0, y0, z);
-    GXColor1u32(*reinterpret_cast<u32*>(&rColor));
+    GXColor4u8(rColor.r, rColor.g, rColor.b, rColor.a);
     GXPosition3f32(x1, y1, z);
-    GXColor1u32(*reinterpret_cast<u32*>(&rColor));
+    GXColor4u8(rColor.r, rColor.g, rColor.b, rColor.a);
     GXEnd();
 }
 

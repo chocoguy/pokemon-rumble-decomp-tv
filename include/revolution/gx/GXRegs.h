@@ -168,4 +168,9 @@ GX_DEFINE_GX_READ_COUNTER(MEM)
 }
 #endif
 
+
+/* A GXColor as the u32 the hardware registers take: R in the top byte. The SDK read the
+ * struct through a u32 pointer, which gives this only on a big-endian CPU. */
+#define GX_RGBA_U32(c) (((u32)(c).r << 24) | ((u32)(c).g << 16) | ((u32)(c).b << 8) | (u32)(c).a)
+
 #endif  

@@ -1,5 +1,7 @@
 #include <nw4r/snd/snd_WaveFile.h>
 
+#include <port_endian.h>
+
 #include <nw4r/snd/snd_AxVoice.h>
 #include <nw4r/ut/ut_algorithm.h>
 
@@ -9,6 +11,9 @@ namespace detail {
 
 WaveFileReader::WaveFileReader(const WaveFile::FileHeader* pFileHeader)
     : mWaveInfo(nullptr) {
+#if defined(PORT)
+    PortFixupRWAV(const_cast<WaveFile::FileHeader*>(pFileHeader));
+#endif
     const WaveFile::InfoBlock* pInfoBlock =
         static_cast<const WaveFile::InfoBlock*>(
             ut::AddOffsetToPtr(pFileHeader, pFileHeader->infoChunkOffset));

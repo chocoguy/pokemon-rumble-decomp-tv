@@ -1027,7 +1027,9 @@ void Voice::CalcMixParam(int channelIndex, int voiceOutIndex,
 	f32 fx_b = mainVolume * nw4r::ut::Clamp(fxSendB, 0.0f, 1.0f);
 	f32 fx_c = mainVolume * nw4r::ut::Clamp(fxSendC, 0.0f, 1.0f);
 
-	f32 remoteOutVolumeOrig[4];
+	// Only the remotes on the output line are filled in below, but all four are read
+	// later: zero the rest (the console read whatever was on the stack).
+	f32 remoteOutVolumeOrig[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 	for (int i = 0; i < 4; i++)
 	{
 		if (mOutputLineFlag & (2 << i))

@@ -19,7 +19,12 @@ namespace nw4r { namespace snd { namespace detail
 	class WaveSound : public BasicSound
 	{
 	public:
+#if defined(PORT)
+		// The console offset of BasicSound::nodePrio; pointers move it on a 64-bit host.
+		typedef ut::LinkList<WaveSound, offsetof(BasicSound, nodePrio)> PriorityLinkList;
+#else
 		typedef ut::LinkList<WaveSound, 0xf0> PriorityLinkList;
+#endif
 
 	public:
 		WaveSound(SoundInstanceManager<WaveSound> *manager, int priority,

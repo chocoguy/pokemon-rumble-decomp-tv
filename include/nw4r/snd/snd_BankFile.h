@@ -16,8 +16,14 @@ namespace BankFile {
 struct InstParam {
     union {
         s32 waveIndex;
+#if defined(PORT)
+        // 32-bit console addresses, as stored; host pointers would change the layout.
+        u32 waveInfoAddress;
+        u32 waveDataLocationCallback;
+#else
         const WaveInfo* waveInfoAddress;
         WaveDataLocationCallback* waveDataLocationCallback;
+#endif
     };
     u8 attack;
     u8 decay;

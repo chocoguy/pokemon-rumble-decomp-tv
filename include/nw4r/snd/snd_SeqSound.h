@@ -25,7 +25,12 @@ namespace nw4r { namespace snd { namespace detail
     {
 
     public:
+#if defined(PORT)
+        // The console offset of BasicSound::nodePrio; pointers move it on a 64-bit host.
+        typedef ut::LinkList<SeqSound, offsetof(BasicSound, nodePrio)> PriorityLinkList;
+#else
         typedef ut::LinkList<SeqSound, 0xf0> PriorityLinkList;
+#endif
 
     public:
         class SeqLoadTask : public Task

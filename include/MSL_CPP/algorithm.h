@@ -94,15 +94,20 @@ void sort(TIt first, TIt last, TCompare compare) {
         }
 
         static int shuffle = -4;
+#if defined(PORT)
+        // The console's iterator size; see include/algorithm.
+        static const long PIVOT_DIVISOR = 4;
+#else
+        static const long PIVOT_DIVISOR = static_cast<long>(sizeof(TIt));
+#endif
         TIt m = first +
-                (len / static_cast<long>(sizeof(TIt)) + shuffle % SHUFFLE_MAX);
+                (len / PIVOT_DIVISOR + shuffle % SHUFFLE_MAX);
 
         if (++shuffle >= SHUFFLE_MAX) {
             shuffle = SHUFFLE_MIN;
         }
 
-        TIt i1 = first + (len * static_cast<long>(sizeof(TIt) - 1) /
-                              static_cast<long>(sizeof(TIt)) +
+        TIt i1 = first + (len * (PIVOT_DIVISOR - 1) / PIVOT_DIVISOR +
                           shuffle % SHUFFLE_MAX);
 
         if (++shuffle >= SHUFFLE_MAX) {

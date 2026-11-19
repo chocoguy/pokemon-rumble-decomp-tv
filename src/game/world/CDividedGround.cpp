@@ -5,6 +5,9 @@
 #include <game/graphics/ScnMdlSimpleDataInline.h>
 #include <game/world/BWorld.h>
 #include <game/world/CBSPTree.h>
+#if defined(PORT)
+#include <port_endian.h>
+#endif
 #include <game/core/CFiber.h>
 #include <game/io/CFileData.h>
 #include <game/animation/AnmObjChrRootScale.h>
@@ -186,6 +189,15 @@ bool CDividedGround::LoadAttr(const StageID* pStageID, int stageNo, const char* 
             continue;
         }
 
+#if defined(PORT)
+        // Big-endian planes and child indices; converted in place once.
+        if (!PortFixupBSP(file->GetData(), file->GetSize())) {
+            if (i == 0) {
+                return false;
+            }
+            continue;
+        }
+#endif
         tree->SetData(file->GetData());
         mBSPFiles[i] = file;
         mBSPTrees[i] = tree;

@@ -182,7 +182,7 @@ void GXInitSpecularDir(GXLightObj* lt_obj, f32 nx, f32 ny, f32 nz) {
 
 void GXInitLightColor(GXLightObj* lt_obj, GXColor color) {
     GX_SETUP_LIGHT(obj, lt_obj)
-    obj->Color = *(u32*)(&color);
+    obj->Color = GX_RGBA_U32(color);
 }
 
 static inline u32 ConvLightID2Num(GXLightID id) {
@@ -258,13 +258,13 @@ void GXSetChanAmbColor(GXChannelID chan, GXColor amb_color) {
     switch (chan) {
     case GX_COLOR0:
         reg = gx->ambColor[GX_COLOR0];
-        rgb = ((*(u32*)(&amb_color)) >> 8);
+        rgb = ((GX_RGBA_U32(amb_color)) >> 8);
         SC_XF_AMBIENT0_F_SET_RGB(reg, rgb);
         colIdx = 0;
         break;
     case GX_COLOR1:
         reg = gx->ambColor[GX_COLOR1];
-        rgb = ((*(u32*)(&amb_color)) >> 8);
+        rgb = ((GX_RGBA_U32(amb_color)) >> 8);
         SC_XF_AMBIENT1_F_SET_RGB(reg, rgb);
         colIdx = 1;
         break;
@@ -279,11 +279,11 @@ void GXSetChanAmbColor(GXChannelID chan, GXColor amb_color) {
         colIdx = 1;
         break;
     case GX_COLOR0A0:
-        SC_XF_AMBIENT0_F_SET_RGBA(reg, *(u32*)(&amb_color));
+        SC_XF_AMBIENT0_F_SET_RGBA(reg, GX_RGBA_U32(amb_color));
         colIdx = 0;
         break;
     case GX_COLOR1A1:
-        SC_XF_AMBIENT1_F_SET_RGBA(reg, *(u32*)(&amb_color));
+        SC_XF_AMBIENT1_F_SET_RGBA(reg, GX_RGBA_U32(amb_color));
         colIdx = 1;
         break;
     default:
@@ -300,14 +300,14 @@ void GXSetChanMatColor(GXChannelID chan, GXColor mat_color) {
     switch (chan) {
     case GX_COLOR0:
         reg = gx->matColor[GX_COLOR0];
-        rgb = ((*(u32*)(&mat_color)) >> 8);
+        rgb = ((GX_RGBA_U32(mat_color)) >> 8);
         SC_XF_MATERIAL0_F_SET_RGB(reg, rgb);
         colIdx = 0;
         break;
 
     case GX_COLOR1:
         reg = gx->matColor[GX_COLOR1];
-        rgb = ((*(u32*)(&mat_color)) >> 8);
+        rgb = ((GX_RGBA_U32(mat_color)) >> 8);
         SC_XF_MATERIAL1_F_SET_RGB(reg, rgb);
         colIdx = 1;
         break;
@@ -325,12 +325,12 @@ void GXSetChanMatColor(GXChannelID chan, GXColor mat_color) {
         break;
 
     case GX_COLOR0A0:
-        SC_XF_MATERIAL0_F_SET_RGBA(reg, *(u32*)(&mat_color));
+        SC_XF_MATERIAL0_F_SET_RGBA(reg, GX_RGBA_U32(mat_color));
         colIdx = 0;
         break;
 
     case GX_COLOR1A1:
-        SC_XF_MATERIAL1_F_SET_RGBA(reg, *(u32*)(&mat_color));
+        SC_XF_MATERIAL1_F_SET_RGBA(reg, GX_RGBA_U32(mat_color));
         colIdx = 1;
         break;
 

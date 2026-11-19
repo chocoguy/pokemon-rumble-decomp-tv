@@ -363,7 +363,7 @@ void GXSetTevAlphaOp(GXTevStageID stage, GXTevOp op, GXTevBias bias, GXTevScale 
 
 void GXSetTevColor(GXTevRegID id, GXColor color) {
     u32 rgba, regRA, regBG;
-    rgba = *(u32*)(&color);
+    rgba = GX_RGBA_U32(color);
     regRA = TEV_REGISTERL(0, 0, (0xE0 + id * 2));
     SC_TEV_REGISTERL_SET_R8(regRA, (rgba >> 24) & 0xFF);
     SC_TEV_REGISTERL_SET_A8(regRA, rgba & 0xFF);
@@ -381,8 +381,8 @@ void GXSetTevColor(GXTevRegID id, GXColor color) {
 
 void GXSetTevColorS10(GXTevRegID id, GXColorS10 color) {
     u32 sRG, sBA, regRA, regBG;
-    sRG = *(u32*)(&color);
-    sBA = *((u32*)(&color) + 1);
+    sRG = ((u32)(u16)color.r << 16) | (u16)color.g;
+    sBA = ((u32)(u16)color.b << 16) | (u16)color.a;
     regRA = TEV_REGISTERL(0, 0, (0xE0 + id * 2));
     SC_TEV_REGISTERL_SET_R(regRA, (sRG >> 16) & ((1 << TEV_REGISTERL_R_SIZE) - 1));
     SC_TEV_REGISTERL_SET_A(regRA, sBA & ((1 << TEV_REGISTERL_A_SIZE) - 1));
@@ -400,7 +400,7 @@ void GXSetTevColorS10(GXTevRegID id, GXColorS10 color) {
 
 void GXSetTevKColor(GXTevKColorID id, GXColor color) {
     u32 rgba, regRA, regBG;
-    rgba = *(u32*)(&color);
+    rgba = GX_RGBA_U32(color);
     regRA = TEV_KREGISTERL(0, 0, (0xE0 + id * 2));
     SC_TEV_KREGISTERL_SET_R(regRA, (rgba >> 24) & 0xFF);
     SC_TEV_KREGISTERL_SET_A(regRA, rgba & 0xFF);

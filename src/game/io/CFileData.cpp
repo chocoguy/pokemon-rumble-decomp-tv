@@ -1,5 +1,8 @@
 #define CFILEDATA_EMISSION_LAYOUT
 namespace std { namespace detail { template <typename Tree, typename Compare> struct map_leaf_search; } }
+#if defined(PORT)
+#include <port_endian.h>
+#endif
 #include <exception>
 #include <MSL_CPP/detail/shared_ptr.h>
 #include <MSL_CPP/allocator.h>
@@ -152,7 +155,13 @@ inline void CFileData::ValidateResource() {
         return;
     }
 
+#if defined(PORT)
+    // The signature is big-endian in the file; the fixup recognises it (either way) and
+    // converts the file, which ResFile below needs.
+    if (mSize >= 4 && PortFixupBRRES(mData)) {
+#else
     if (mSize >= 4 && *static_cast<u32*>(mData) == 'bres') {
+#endif
         nw4r::g3d::ResFile resFile(mData);
         if (!resFile.CheckRevision()) {
             mBuffer.reset();

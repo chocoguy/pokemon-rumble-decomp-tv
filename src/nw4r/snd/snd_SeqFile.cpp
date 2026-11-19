@@ -1,5 +1,9 @@
 #include <nw4r/snd/snd_SeqFile.h>
 
+#if defined(PORT)
+#include <port_endian.h>
+#endif
+
 #include <nw4r/ut/ut_algorithm.h>
 
 #include <string.h>
@@ -29,6 +33,9 @@ bool SeqFileReader::IsValidFileHeader(const void* pSeqBin) {
 
 SeqFileReader::SeqFileReader(const void* pSeqBin)
     : mHeader(nullptr), mDataBlock(nullptr) {
+#if defined(PORT)
+    PortFixupBRSEQ(const_cast<void*>(pSeqBin));
+#endif
     if (!IsValidFileHeader(pSeqBin)) {
         return;
     }
